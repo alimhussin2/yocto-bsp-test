@@ -18,6 +18,13 @@ ls -lah /usr/bin/git_proxy_command
 cat /usr/bin/git_proxy_command
 export GIT_PROXY_COMMAND=/usr/bin/git_proxy_command
 
+git config --global user.name "minnow"
+git config --global user.email minnow@test
+git config --global http.proxy $http_proxy
+git config --global https.proxy $https_proxy
+git config --global socks.proxy $socks_proxy
+cat ~/.gitconfig
+
 socat -V
 git --version
 
