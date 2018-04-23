@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 
 COMMIT_ID="9e3a9637b8f86f504e187b96cd0c98d8e1f651da"
 SERVER_IP="192.168.122.2"
@@ -9,14 +9,16 @@ IMAGE_TESTED="core-image-sato"
 export http_proxy="http://proxy-png.intel.com:911"
 export https_proxy="http://proxy-png.intel.com:912"
 export ftp_proxy="http://proxy-png.intel.com:911"
-export socks_proxy="proxy-socks.jf.intel.com"
+export socks_proxy="proxy-socks.jf.intel.com:1080"
 
 echo "#!/bin/bash -xe
 exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:$1:$2,socksport=1080"  >> /usr/bin/git_proxy_command
 chmod +x /usr/bin/git_proxy_command
+ls -lah /usr/bin/git_proxy_command
+cat /usr/bin/git_proxy_command
 export GIT_PROXY_COMMAND=/usr/bin/git_proxy_command
 
-socat --version
+socat -V
 git --version
 
 cd $HOME
