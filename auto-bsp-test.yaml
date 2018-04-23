@@ -1,7 +1,7 @@
 metadata:
     name: auto-bsp-test
     format: "Lava-Test-Shell Test Definition 1.0"
-    description: "Yocto project auto bsp testing
+    description: "Yocto project auto bsp testing"
     maintainer: 
         - alimhussin2@gmail.com
     os:
