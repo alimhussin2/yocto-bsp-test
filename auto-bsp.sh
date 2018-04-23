@@ -9,7 +9,10 @@ IMAGE_TESTED="core-image-sato"
 export http_proxy="http://proxy-png.intel.com:911"
 export https_proxy="http://proxy-png.intel.com:912"
 export ftp_proxy="http://proxy-png.intel.com:911"
-export socks_proxy="http://proxy-png.intel.com:1080"
+export socks_proxy="proxy-socks.jf.intel.com"
+
+socat --version
+git --version
 
 cd $HOME
 pwd
