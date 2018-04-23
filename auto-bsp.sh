@@ -11,6 +11,11 @@ export https_proxy="http://proxy-png.intel.com:912"
 export ftp_proxy="http://proxy-png.intel.com:911"
 export socks_proxy="proxy-socks.jf.intel.com"
 
+echo "#!/bin/bash -xe
+exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:$1:$2,socksport=1080"  >> /usr/bin/git_proxy_command
+chmod +x /usr/bin/git_proxy_command
+export GIT_PROXY_COMMAND=/usr/bin/git_proxy_command
+
 socat --version
 git --version
 
