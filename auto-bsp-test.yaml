@@ -14,4 +14,12 @@ metadata:
         - lava-test-shell
 run:
     steps:
+        - ls -l
         - ./auto-bsp.sh
+        
+parse:
+    pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
+    fixupdict:
+        ERROR: fail
+        FAIL: fail
+        PASS: pass
