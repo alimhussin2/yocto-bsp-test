@@ -1,16 +1,21 @@
 #!/bin/bash
 
-COMMIT_ID=""
-SERVER_IP=""
-DUT_IP=""
+COMMIT_ID="9e3a9637b8f86f504e187b96cd0c98d8e1f651da"
+SERVER_IP="192.168.122.2"
+DUT_IP="192.168.122.100"
 TARGET_MACHINE="intel-corei7-64"
 IMAGE_TESTED="core-image-sato"
 
+export http_proxy="http://proxy-png.intel.com:911"
+export https_proxy="http://proxy-png.intel.com:912"
+export ftp_proxy="http://proxy-png.intel.com:911"
+export socks_proxy="http://proxy-png.intel.com:1080"
 
 cd $HOME
+pwd
 git clone git://git.yoctoproject.org/poky
 cd $HOME/poky
-#git checkout $COMMIT_ID
+git checkout $COMMIT_ID
 source oe-init-build-env
 
 echo "INHERIT += \"testimage\"
