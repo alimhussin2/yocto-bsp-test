@@ -13,7 +13,7 @@ export socks_proxy="proxy-socks.jf.intel.com:1080"
 
 echo '#!/bin/bash -xe
 exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:$1:$2,socksport=1080' > /usr/bin/git_proxy_command
-chmod +x /usr/bin/git_proxy_command
+chmod 755 /usr/bin/git_proxy_command
 ls -lah /usr/bin/git_proxy_command
 cat /usr/bin/git_proxy_command
 export GIT_PROXY_COMMAND=/usr/bin/git_proxy_command
