@@ -1,0 +1,75 @@
+device_type: minnowboard
+job_name: NFS Network Boot minnowboard-turbot01 with Yocto core-image-sato-sdk (intel-corei7-64)
+ timeouts:
+  job:
+    minutes: 20
+  action:
+    minutes: 20
+  #actions:
+  #  bootloader-commands:
+  #    minutes: 2
+  #  bootloader-interrupt:
+  #    minutes: 1
+  #  power-off:
+  #    minutes: 1
+    #auto-login:
+     # minutes: 1
+  connection:
+    minutes: 2
+ priority: medium
+visibility: public
+ actions:
+- deploy:
+    timeout:
+      minutes: 5
+    to: tftp
+    kernel:
+      url: file:///srv/data/images/intel-corei7-64/core-image-sato/bzImage-igb
+      type: zimage
+    #ramdisk:
+    #  url: file:///srv/data/images/intel-corei7-64/core-image-sato/initrd
+    modules:
+      url: file:///srv/data/images/intel-corei7-64/core-image-sato-sdk/modules-intel-corei7-64.tgz
+      compression: gz
+    nfsrootfs:
+      url: file:///srv/data/images/intel-corei7-64/core-image-sato-sdk/core-image-sato-sdk-intel-corei7-64.tar.gz
+      compression: gz
+    os: oe
+ - boot:
+    timeout:
+      minutes: 10
+    method: grub
+    commands: nfs
+    auto_login: {login_prompt: 'intel-corei7-64 login:', username: root}
+    #root_uuid: UUID=88BE-A7C3
+    #boot_part: 1
+    #kernel: /boot/bzImage
+    #ramdisk: /boot/initrd
+    prompts:
+      - 'root@intel-corei7-64:~#'
+ - test:
+    timeout:
+      minutes: 5
+    definitions:
+      - repository:
+          metadata:
+            format: lava test definition
+            name: test-inline
+            description: "basic linux command test"
+            os:
+              - oe
+          run:
+            steps:
+              - export SERVER_IP="myserverip"
+              - export DUT_IP="mydutip"
+              - echo "DUT_IP=$DUT_IP, SERVER_IP=$SERVER_IP"
+              - ifconfig -a
+        from: inline
+        name: test-inline
+        path: inline/test-inline.yaml
+    definitions:
+    - repository: https://github.com/alimhussin2/yocto-bsp-test.git
+      from: git
+      path: auto-bsp-test.yaml
+      name: lyocto-bsp-test
+    name: yocto-bsp-test
