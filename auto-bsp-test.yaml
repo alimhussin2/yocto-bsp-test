@@ -1,0 +1,13 @@
+metadata:
+    name: auto-bsp-test
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Yocto project auto bsp testing
+    os:
+        - oe
+    devices:
+        - minnowboard
+    scope:
+        - functional
+run:
+    steps:
+        - ./auto-bsp.sh
