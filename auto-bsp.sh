@@ -16,7 +16,7 @@ exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:\$1:\$2,socksport=1080"  >> /us
 chmod +x /usr/bin/git_proxy_command
 ls -lah /usr/bin/git_proxy_command
 cat /usr/bin/git_proxy_command
-export GIT_PROXY_COMMAND=/usr/local/bin/git_proxy_command
+export GIT_PROXY_COMMAND=/usr/bin/git_proxy_command
 
 git config --global user.name "minnow"
 git config --global user.email minnow@test
