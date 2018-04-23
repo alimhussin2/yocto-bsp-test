@@ -11,8 +11,8 @@ export https_proxy="http://proxy-png.intel.com:912"
 export ftp_proxy="http://proxy-png.intel.com:911"
 export socks_proxy="proxy-socks.jf.intel.com:1080"
 
-echo "#!/bin/bash -xe
-exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:\$1:\$2,socksport=1080"  >> /usr/bin/git_proxy_command
+echo '#!/bin/bash -xe
+exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:$1:$2,socksport=1080' > /usr/bin/git_proxy_command
 chmod +x /usr/bin/git_proxy_command
 ls -lah /usr/bin/git_proxy_command
 cat /usr/bin/git_proxy_command
@@ -35,11 +35,11 @@ cd $HOME/poky
 git checkout $COMMIT_ID
 source oe-init-build-env
 
-echo "INHERIT += \"testimage\"
-TEST_TARGET = \"simpleremote\"
+echo 'INHERIT += "testimage"
+TEST_TARGET = "simpleremote"
 TEST_SERVER_IP = $SERVER_IP
 TEST_TARGET_IP = $DUT_IP
-MACHINE = \"$TARGET_MACHINE\"" >> $HOME/poky/build/conf/local.conf
+MACHINE = "$TARGET_MACHINE"' >> $HOME/poky/build/conf/local.conf
 
 bitbake rpm busybox curl run-postinsts
 bitbake package-index
