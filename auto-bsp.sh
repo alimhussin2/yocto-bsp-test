@@ -30,7 +30,7 @@ git --version
 
 cd $HOME
 pwd
-git clone git://git.yoctoproject.org/poky
+#git clone git://git.yoctoproject.org/poky
 git clone http://git.yoctoproject.org/git/poky
 cd $HOME/poky
 git checkout $COMMIT_ID
