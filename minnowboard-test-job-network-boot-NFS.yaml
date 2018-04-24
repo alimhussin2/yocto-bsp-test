@@ -41,32 +41,11 @@ visibility: public
     method: grub
     commands: nfs
     auto_login: {login_prompt: 'intel-corei7-64 login:', username: root}
-    #root_uuid: UUID=88BE-A7C3
-    #boot_part: 1
-    #kernel: /boot/bzImage
-    #ramdisk: /boot/initrd
     prompts:
       - 'root@intel-corei7-64:~#'
  - test:
     timeout:
       minutes: 5
-    definitions:
-      - repository:
-          metadata:
-            format: lava test definition
-            name: test-inline
-            description: "basic linux command test"
-            os:
-              - oe
-          run:
-            steps:
-              - export SERVER_IP="myserverip"
-              - export DUT_IP="mydutip"
-              - echo "DUT_IP=$DUT_IP, SERVER_IP=$SERVER_IP"
-              - ifconfig -a
-        from: inline
-        name: test-inline
-        path: inline/test-inline.yaml
     definitions:
     - repository: https://github.com/alimhussin2/yocto-bsp-test.git
       from: git
