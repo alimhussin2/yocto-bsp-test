@@ -39,8 +39,8 @@ source oe-init-build-env
 
 echo "INHERIT += \"testimage\"
 TEST_TARGET = \"simpleremote\"
-TEST_SERVER_IP = $SERVER_IP
-TEST_TARGET_IP = $DUT_IP
+TEST_SERVER_IP = \"$SERVER_IP\"
+TEST_TARGET_IP = \"$DUT_IP\"
 MACHINE = \"$TARGET_MACHINE\"" >> $HOME/poky/build/conf/local.conf
 
 bitbake rpm busybox curl run-postinsts
