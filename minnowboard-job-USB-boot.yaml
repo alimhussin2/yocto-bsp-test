@@ -1,0 +1,33 @@
+device_type: minnowboard
+job_name: USB Boot minnowboard-turbot01 with Yocto core-image-sato-sdk(systemd)-intel-corei7-64
+ timeouts:
+  job:
+    minutes: 20
+  action:
+    minutes: 10
+  #actions:
+  #  bootloader-commands:
+  #    minutes: 2
+  #  bootloader-interrupt:
+  #    minutes: 1
+  #  power-off:
+  #    minutes: 1
+    #auto-login:
+     # minutes: 1
+  connection:
+    minutes: 2
+ priority: medium
+visibility: public
+ actions:
+ - boot:
+    timeout:
+      minutes: 5
+    method: grub
+    commands: usb
+    auto_login: {login_prompt: 'intel-corei7-64 login:', username: root}
+    root_uuid: UUID=88BE-A7C3
+    boot_part: 1
+    kernel: /boot/bzImage
+    ramdisk: /boot/initrd
+    prompts:
+      - 'root@intel-corei7-64:~#'
