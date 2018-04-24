@@ -6,13 +6,13 @@ DUT_IP="192.168.122.100"
 TARGET_MACHINE="intel-corei7-64"
 IMAGE_TESTED="core-image-sato"
 
-export http_proxy="http://proxy-png.intel.com:911"
-export https_proxy="http://proxy-png.intel.com:912"
-export ftp_proxy="http://proxy-png.intel.com:911"
-export socks_proxy="proxy-socks.jf.intel.com:1080"
+export http_proxy="http://192.168.122.2:9111"
+export https_proxy="http://192.168.122.2:9111"
+export ftp_proxy="http://192.168.122.2:9111"
+export socks_proxy="http://192.168.122.2:1080"
 
 echo '#!/bin/bash -xe
-exec socat STDIO SOCKS4:proxy-socks.jf.intel.com:$1:$2,socksport=1080' > /usr/bin/git_proxy_command
+exec socat STDIO SOCKS4:http://192.168.122.2:$1:$2,socksport=1080' > /usr/bin/git_proxy_command
 chmod 755 /usr/bin/git_proxy_command
 ls -lah /usr/bin/git_proxy_command
 cat /usr/bin/git_proxy_command
