@@ -41,6 +41,11 @@ lava-test-case $TEST_ID-check-bash --shell $CMD
 TEST_ID=198
 TEST_CASE="switch to runlevel 3"
 CMD="init 3"
+lava-test-case $TEST_ID-switch-runlevel-3 --shell $CMD
+
+TEST_ID=1981
+TEST_CASE="runlevel 3"
+CMD="runlevel"
 lava-test-case $TEST_ID-runlevel-3 --shell $CMD
 
 TEST_ID=1980
