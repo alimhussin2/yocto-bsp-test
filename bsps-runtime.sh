@@ -52,11 +52,3 @@ TEST_ID=1980
 TEST_CASE="switch to runlevel 5 from runlevel 3"
 CMD="init 5"
 lava-test-case $TEST_ID-runlevel-3-to-5 --shell $CMD
-
-# TEST_ID=210
-# TEST_CASE: reboot system
-# METHOD: run 'reboot' command in terminal
-TEST_ID=210
-TEST_CASE="reboot system"
-CMD="reboot"
-lava-test-case $TEST_ID-reboot-system --shell $CMD
