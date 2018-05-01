@@ -8,4 +8,4 @@ example-lava-job
 
 # References: 
 BSP test: https://wiki.yoctoproject.org/wiki/BSP_Test_Plan
-Yocto Project repository: git://git.yoctoproject.org/poky
+Yocto Project repository: https://git.yoctoproject.org/cgit/cgit.cgi/poky/
