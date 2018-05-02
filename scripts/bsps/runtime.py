@@ -42,12 +42,12 @@ class RuntimeTest():
         self.testid = 198
         subprocess.call(['lava-test-case', '198:'+self.className+'test_runlevel_3', '--shell', 'init 3'])
 
-#t = RuntimeTest(200)
-#print(t.get_testid())
-#t.test_check_bash()
-#print(t.get_testid())
-#t.testid = 300
-#print(t.get_testid())
-#t.test_runlevel_5()
-#t.test_runlevel_3()
-#print(t.get_testid())
+t = RuntimeTest(200)
+print(t.get_testid())
+t.test_check_bash()
+print(t.get_testid())
+t.testid = 300
+print(t.get_testid())
+t.test_runlevel_5()
+t.test_runlevel_3()
+print(t.get_testid())
