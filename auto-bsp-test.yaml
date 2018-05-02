@@ -17,7 +17,7 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - cd /scripts/bsps/
+        - cd scripts/bsps/
         - ./runtime.py
         
 parse:
