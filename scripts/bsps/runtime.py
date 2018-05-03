@@ -3,7 +3,7 @@
 import subprocess
 
 class RuntimeTest():
-    def __init__(self, testid, className = 'bsps.RuntimeTests.'):
+    def __init__(self, testid = 0, className = 'bsps.RuntimeTests.'):
         self.testid = testid
         self.className = className
 
@@ -19,7 +19,7 @@ class RuntimeTest():
                     "/bin/bash"
         '''
         self.testid = 240
-        subprocess.call(['lava-test-case', '240:', '--shell', 'which', 'bash'])
+        subprocess.call(['lava-test-case', '240:'+self.className+'test_check_bash', '--shell', 'which', 'bash'])
 
     def test_runlevel_5(self):
         '''
@@ -42,7 +42,7 @@ class RuntimeTest():
         self.testid = 198
         subprocess.call(['lava-test-case', '198:'+self.className+'test_runlevel_3', '--shell', 'init 3'])
 
-t = RuntimeTest(200)
+t = RuntimeTest()
 print(t.get_testid())
 t.test_check_bash()
 print(t.get_testid())
