@@ -42,6 +42,10 @@ class RuntimeTest():
         self.testid = 198
         subprocess.call(['lava-test-case', '198:'+self.className+'test_runlevel_3', '--shell', 'init 3'])
 
+    def test_force_fail(self):
+        self.testid = -99
+        subprocess.call(['lava-test-case', '-99'+self.className+'test_force_fail', '--shell', 'lava-test-raise "ERROR MESSGAE: This is error message in case test error"'])
+        
 t = RuntimeTest()
 print(t.get_testid())
 t.test_check_bash()
@@ -51,3 +55,4 @@ print(t.get_testid())
 t.test_runlevel_5()
 t.test_runlevel_3()
 print(t.get_testid())
+t.test_force_fail()
