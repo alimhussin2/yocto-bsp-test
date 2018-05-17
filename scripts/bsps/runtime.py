@@ -58,6 +58,6 @@ t.testid = 300
 print(t.get_testid())
 t.test_runlevel_5()
 t.test_runlevel_3()
-t.test_check_rpm()
-print(t.get_testid())
+#t.test_check_rpm()
+#print(t.get_testid())
 #t.test_force_fail()
