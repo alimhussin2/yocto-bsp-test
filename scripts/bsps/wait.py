@@ -16,5 +16,5 @@ f.write('%s' %(pid))
 f.close()
 
 print('IDLE  {:>6}: wait for %s seconds' .format(pid) %(timeout))
-time.sleep(wait)
+time.sleep(timeout)
 sys.stdout.flush()
