@@ -18,6 +18,7 @@ run:
         - ls -l
         - chmod 755 -R scripts
         - cd scripts/bsps/
+        - env
         - ./lava_wait.py
         
 parse:
