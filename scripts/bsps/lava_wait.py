@@ -16,10 +16,9 @@ def create_file(dest, mode, msg):
     f.write(msg)
     f.close
 
-create_file('/etc/profile.d/lava_dut_env.sh', 'w', 'export IDLE_FLAG=0')
 print('LAVA READY TO RUN TEST')
 print('LAVA now in idle mode...')
-proc = subprocess.call(['lava-test-case', 'wait', '--shell', 'python3', 'wait_child.py'])
+proc = subprocess.call(['lava-test-case', 'wait', '--shell', 'bash', 'idle.sh'])
 sys.stdout.flush()
 time.sleep(1)
 print('Idle mode end')
