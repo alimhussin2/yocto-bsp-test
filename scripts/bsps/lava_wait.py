@@ -16,6 +16,7 @@ def create_file(dest, mode, msg):
     f.write(msg)
     f.close
 
+print('Board boot up successfully...')
 print('LAVA READY TO RUN TEST')
 print('LAVA now in idle mode...')
 proc = subprocess.call(['lava-test-case', 'wait', '--shell', 'bash', 'idle.sh'])
