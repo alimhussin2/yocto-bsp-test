@@ -19,7 +19,6 @@ run:
         - chmod 755 -R scripts
         - cd scripts/bsps/
         - env
-        - echo "board boot up successfully"
         - ./lava_wait.py
         
 parse:
