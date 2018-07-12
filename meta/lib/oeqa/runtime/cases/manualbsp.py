@@ -1,9 +1,7 @@
 from oeqa.runtime.case import OERuntimeTestCase
 from oeqa.core.decorator.depends import OETestDepends
 from oeqa.core.decorator.oeid import OETestID
-from oeqa.utils.commands import runCmd, bitbake
-
-import os
+import subprocess
 
 class BspRuntimeTest(OERuntimeTestCase):
 
@@ -11,117 +9,137 @@ class BspRuntimeTest(OERuntimeTestCase):
     def test_check_bash(self):
         status, output = self.target.run('which bash')
         msg = ('bash shell not working as expected. '
-                'Status and output:%s and %s' % (status, output))
+                'Status and output:%s and %s.' % (status, output))
+        self.assertEqual(status, 0, msg = msg)
+
+    @OETestID(228)
+    def test_runlevel_5(self):
+        status, output = self.target.run('init 5')
+        self.assertEqual(status, 255, msg = None)
+        command = 'lvl=$(runlevel | cut -d " " -f2); if [[ "$lvl" == "5" ]]; then exit 0; else exit 1; fi'
+        status, output = self.target.run(command)
+        msg = ('System did not start from runlevel 5. '
+                'Status:%s.' % (status))
         self.assertEqual(status, 0, msg = msg)
 
     @OETestID(198)
     def test_runlevel_3(self):
         status, output = self.target.run('init 3')
+        msg = ('System unable to start with runlevel 3. '
+                'Status and output:%s and %s.' % (status, output))
+        self.assertEqual(status, 255, msg = None)
+
+        command = 'lvl=$(runlevel | cut -d " " -f2); if [[ $lvl == "3" ]]; then exit 0 ; else exit 1; fi'
+        status, output = self.target.run(command)
         msg = ('Unable to change from runlevel 5 to 3. '
-                'Status and output:%s and %s' % (status, output))
+                'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
-
-    @OETestID(228)
-    def test_runlevel_5(self):
-        status, output = self.target.run('runlevel')
-        msg = ('System did not start from runleve 5. '
-                'Status and output:%s and %s' % (status, output))
-        self.assertEqual(status, 0, msg = msg)
-
-    #@OETestID(210)
-    #@OETestDepends(['bsp.BspToolsTest.test_rpm_dependency_install'])
-    #def test_reboot(self):
-    #    status, output = self.target.run('touch /home/root/minnow.idle.done')
-    #    msg = ('System failed to reboot. '
-    #            'Status and output:%s and %s' % (status, output))
-    #    self.assertEqual(status, 0, msg = msg)
 
 class BspHardwareTest(OERuntimeTestCase):
 
-    #HOMEDIR = os.path.expanduser("~")
-    '''
-    Need to detect usb stick, hdd and microsd
-    '''
-    #def test_detect_peripheral(self):
-    #    src = "/tmp/detect_device.sh"
-    #    dest = "~/detect_device.sh"
-    #   output = self.target.copyTo(src, dest)
+    @classmethod
+    def setUpClass(cls):
+        cls.tc.target.run('mkdir ~/test')
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tc.target.run('rm -rf ~/test')
 
     @OETestID(216)
     def test_USB_mount(self):
-        status, output = self.target.run('mkdir ~/stick; DEVICE=$(blkid | grep sd | cut -d ":" -f1) && mount $DEVICE ~/stick')
+        command = 'mkdir ~/test/stick; DEVICE=$(blkid | grep sd | cut -d ":" -f1 | sed -n 1p); mount $DEVICE ~/test/stick'
+        status, output = self.target.run(command)
         msg = ('Unable to mount USB stick. '
-                'Status and output:%s and %s' % (status, output))
+                'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
     @OETestID(217)
-    @OETestDepends(['manualbsp.BspHardwareTest.test_USB_mount'])
+    @OETestDepends(['manualbsp.BspHardwareTest.test_USB_write_file'])
     def test_USB_read_file(self):
-        status, output = self.target.run('ls -lah  ~/stick/')
-        msg = ('Status and output:%s and %s' % (status, output))
+        command = 'ls -lah ~/test/stick/hello_stick'
+        status, output = self.target.run(command)
+        msg = ('Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
+    @OETestDepends(['manualbsp.BspHardwareTest.test_USB_mount'])
     @OETestID(219)
-    #@OETestDepends(['manualbsp.HardwareTest.test_USB_read_file'])
     def test_USB_write_file(self):
-        status, output = self.target.run('touch ~/stick/hello_stick')
-        msg = ('Status and  output:%s and %s' % (status, output))
+        command = 'touch ~/test/stick/hello_stick'
+        status, output = self.target.run(command)
+        msg = ('Status and  output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
+    @OETestDepends(['manualbsp.BspHardwareTest.test_USB_mount'])
     @OETestID(218)
-    #@OETestDepends(['manualbsp.HardwareTest.test_USB_read_file'])
     def test_USB_unmount(self):
-        status, output = self.target.run('umount ~/stick')
+        command = 'umount ~/test/stick'
+        status, output = self.target.run(command)
         msg = ('Unable to unmount USB stick. ' 
                 'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
     @OETestID(241)
     def test_MicroSD_mount(self):
-        status, output = self.target.run('mkdir microsd; DEVICE=$(blkid | grep mmc | cut -d ":" -f1); mount $DEVICE microsd')
+        command = 'mkdir ~/test/microsd; DEVICE=$(blkid | grep mmcblk | cut -d ":" -f1 | sed -n 1p); mount $DEVICE ~/test/microsd'
+        status, output = self.target.run(command)
         msg = ('Unable to mount MicroSD. '
                 'Status and output:%s and %s.' %(status, output))
         self.assertEqual(status, 0, msg = msg)
 
+    @OETestDepends(['manualbsp.BspHardwareTest.test_MicroSD_mount'])
     @OETestID(242)
     def test_MicroSD_read_file(self):
-        status, output = self.target.run('ls -lah ~/microsd')
+        command = 'ls -lah ~/test/microsd'
+        status, output = self.target.run(command)
         msg = ('Unable to read MicroSD. '
                 'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
+    @OETestDepends(['manualbsp.BspHardwareTest.test_MicroSD_mount'])
     @OETestID(244)
     def test_MicroSD_write_file(self):
-        status, output = self.target.run('touch ~/microsd/hello_mmc')
+        command = 'touch ~/test/microsd/hello_mmc'
+        status, output = self.target.run(command)
         msg = ('Unable to write to MicroSD. '
                 'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
+    @OETestDepends(['manualbsp.BspHardwareTest.test_MicroSD_mount'])
     @OETestID(243)
     def test_MicroSD_unmount(self):
-        status, output = self.target.run('umount ~/microsd')
+        command = 'umount ~/test/microsd'
+        status, output = self.target.run(command)
         msg = ('Unable to unmount MicroSD. '
                 'Status and output:%s and %s.' % (status, output))
         self.assertEqual(status, 0, msg = msg)
 
-class BspToolsTest(OERuntimeTestCase):
+    def test_copy_image_to_DUT(self):
+        deploy_dir_image = self.tc.td['DEPLOY_DIR_IMAGE']
+        image_link_name = self.tc.td['IMAGE_LINK_NAME']
+        image = image_link_name + '.wic'
+        wic_image = os.path.join(deploy_dir_image, image)
+        wic_image = subprocess.check_output('ls -lah %s | cut -d " " -f12' % (wic_image), shell = True).decode("utf-8").strip('\n')
+        src_img = os.path.join(deploy_dir_image, wic_image)
+        dest_img = '/home/root/test'
 
-    @OETestID(193)
-    def test_rpm_dependency_install(self):
-        '''
-        steps
-        1. bitbake mc
-        2. copy file mc.rpm to target
-        3. install mc in target $ rpm -ivh mc.rpm
-        '''
-        src = "/tmp/mc-4.8.20-r0.corei7_64.rpm"
-        dst = "/tmp/mc-4.8.20-r0.corei7_64.rpm"
-        rpm_file = "/tmp/mc-4.8.20-r0.corei7_64.rpm"
-        #homedir = os.path.expanduser("~")
-        #bitbake('mc')
-        status, output = self.target.copyTo(src, dst)
-        msg = 'File could not be copied. Output: %s' % output
-        self.assertEqual(status, 0, msg = msg)
-        status, output = self.target.run('rpm -ivh %s' % (rpm_file))
-        msg = ('Status and output:%s and %s' % (status, output))
-        self.assertEqual(status, 1, msg = msg)
+       copy_image_status, output = self.target.copyTo(src_img, dest_img)
+       msg = ('Image %s is not exist. '
+                'Status and output:%s and %s.' % (image, copy_image_status, output))
+        self.assertEqual(copy_image_status, 0, msg = msg)
+
+    #@OETestDepends(['manualbsp.BspHardwareTest.test_copy_image_to_DUT'])
+    #def test_prepare_image_MicroSD(self):
+    #    command_format_microsd = 'DEVICE=$(blkid | grep mmcblk | cut -d ":" -f1 | sed -n 1p); mkfs.ext4 $DEVICE'
+    #    status, output = self.target.run(command_format_microsd)
+    #    msg = ('Unable to format MicroSD. '
+    #            'Status and output:%s and %s.' % (status, output))
+    #    self.assertEqual(status, 0, msg = msg)
+
+    #@OETestDepends(['manualbsp.BspHardwareTest.test_copy_image_to_DUT'])
+    #def test_prepare_image_USB_stick(self):
+    #    command_format_microsd = 'DEVICE=$(blkid | grep sd | cut -d ":" -f1 | sed -n 1p); mkfs.ext4 $DEVICE'
+    #    status, output = self.target.run(command_format_microsd)
+    #    msg = ('Unable to format USB stick. '
+    #            'Status and output:%s and %s.' % (status, output))
+    #    self.assertEqual(status, 0, msg = msg)
+
