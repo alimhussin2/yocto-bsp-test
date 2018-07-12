@@ -122,8 +122,8 @@ class BspHardwareTest(OERuntimeTestCase):
         src_img = os.path.join(deploy_dir_image, wic_image)
         dest_img = '/home/root/test'
 
-       copy_image_status, output = self.target.copyTo(src_img, dest_img)
-       msg = ('Image %s is not exist. '
+        copy_image_status, output = self.target.copyTo(src_img, dest_img)
+        msg = ('Image %s is not exist. '
                 'Status and output:%s and %s.' % (image, copy_image_status, output))
         self.assertEqual(copy_image_status, 0, msg = msg)
 
