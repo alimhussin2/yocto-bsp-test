@@ -6,6 +6,8 @@
 #              This script is should be located in
 #              poky/meta/lib/oeqa/runtime/cases/
 
+LOG_FILE="bsphardware.log"
+
 usage() {
 echo "BSP hardware test is a script used to test hardware"
 echo "such as USB stick, micro SD and SSD hard disk on Yocto Project."
@@ -29,9 +31,18 @@ DEVICE=""
 while [[ $# -gt 0 ]]; do
 case "$1" in
     -d|--device)
-        echo "get device's name"
-        DEVICE=$(blkid | grep $2 | cut -d ":" -f1 | sed -n 1p | sed "s/[0-9]//g")
-        echo $DEVICE
+        echo "[INFO]: get device's name" 2>&1 | tee -a $LOG_FILE
+        #echo "[DEBUG]: commandline: DEVICE=$(blkid | grep $2 | cut -d ':' -f1 | sed -n 1p | sed 's/[0-9]//g')" 2>&1 | tee -a $LOG_FILE
+        #DEVICE=$(blkid | grep $2 | cut -d ":" -f1 | sed -n 1p | sed "s/[0-9]//g")
+        array_devices=()
+        index_device=()
+        array_devices=$(ls /dev/$2*)
+        for i in ${array_devices[@]}
+        do
+            index_device+=($i)
+        done
+        DEVICE="${index_device[0]}"
+        echo "[INFO]: Detected device: $DEVICE"$'\n' 2>&1 | tee -a $LOG_FILE
         ;;
     -p|--partition)
         echo "get device's partition $2"
@@ -47,17 +58,25 @@ case "$1" in
             echo "[ERROR]: Missing filename."
             exit 1
         fi
-        file=$(find . -name $2)
+        IMAGE=$(find . -name $2)
         if [[ "$DEVICE" != "" ]]; then
-            if [[ -f $file ]]; then
-                echo dd if=$file of=$DEVICE status=progress
+            if [[ -f $IMAGE ]]; then
+                echo "[INFO]: Flashing $IMAGE to $DEVICE"
+                echo "[DEBUG]: commandline: dd if=$IMAGE of=$DEVICE status=progress"
+                dd if=$IMAGE of=$DEVICE status=progress
             else
-                echo "[ERROR]: File $file not exist! Unable to flash $DEVICE."
+                echo "[ERROR]: File $IMAGE not exist! Unable to flash $DEVICE."
                 exit 1
             fi
         else
            echo "[ERROR]: Target device to flash is not define."
+           echo "[INFO]: Use -d <device's keyword> -F <filename>"
            exit 1
+        fi
+        if [[ $? -eq 0 ]]; then
+            echo "[INFO]: Successfully flash $DEVICE"
+        else
+            echo "[ERROR]: Failed to flash $IMAGE on $DEVICE"
         fi
         ;;
     -t|touch)
@@ -71,50 +90,59 @@ case "$1" in
         ;;
     -m|mount)
         if [[ ! -d $2 ]];then
-            mkdir $2
+            mkdir -p $2
         fi
         if [[ "$DEVICE" == "" || " $SETPARTITION" == "" ]]; then
-            echo "[ERROR]: Target device and partition not found." 
-            echo "Use -d <device_keyword> -sp <partition's number> -m <dir>"
-            exit 1
+            echo "[ERROR]: Target device and partition not found." 2>&1 | tee -a $LOG_FILE 
+            echo "[INFO]: Use -d <device_keyword> -sp <partition's number> -m <dir>"  2>&1 | tee -a $LOG_FILE
         else
-            echo "Mounting removable media..."
-            echo "mount $DEVICE$SETPARTITION $2"
+            echo "[INFO]: Mounting removable media..." 2>&1 | tee -a $LOG_FILE
+            echo "[DEBUG]: commandline: mount $DEVICE$SETPARTITION $2"$'\n' 2>&1 | tee -a $LOG_FILE
             mount $DEVICE$SETPARTITION $2
-            exit 
+        fi
+        if [[ $? -eq 0 ]]; then
+            echo "[INFO]: Device $DEVICE$SETPARTITION mount successfully"$'\n' 2>&1 | tee -a $LOG_FILE
+            exit 0
+        else
+            echo "[ERROR]: Unable to mount device $DEVICE$SETPARTITION. Device does not exist"$'\n' 2>&1 | tee -a $LOG_FILE
+            exit 1
         fi
         ;;
     -u|umount)
-        echo "Unmount $2"
+        echo "[INFO]: Unmount $2" 2>&1 | tee -a $LOG_FILE
         if [[ -d $2 ]]; then
-            echo umount $2
+            echo "[DEBUG]: commandline: umount from $2" 2>&1 | tee -a $LOG_FILE
             umount $2
         else
-            echo "[Error]: No mount point on $2"
+            echo "[Error]: No mount point on $2"$'\n' 2>&1 | tee -a $LOG_FILE
             exit 1
         fi
         if [[ $? -eq 0 ]];then 
-            echo "Device $2 unmount successfully"
-            echo "rm -rf $2"
+            echo "[INFO]: Device $2 unmount successfully" 2>&1 | tee -a $LOG_FILE
+            echo "[INFO]: Removing mount point on $2" $'\n' 2>&1 | tee -a $LOG_FILE
             rm -rf $2
+        else
+            echo "[ERROR]: Unable to unmount from $2"$'\n' 2>&1 | tee -a $LOG_FILE
         fi
         ;;
     -r|--runlevel)
-        level=$(runlevel | grep $2 | cut -d " " -f2 | grep $2)
-        echo "[DEBUG]: $level"
+        level=$(runlevel | cut -d " " -f2)
+        echo "[DEBUG]: commandline: runlevel | cut -d ' ' -f2" 2>&1 | tee -a $LOG_FILE
         if [[ "$2" == "3" || "$2" == "5" ]]; then
             if [[ "$level" == "3" ]]; then
-                echo "[INFO]: System start with runlevel $level"
+                echo "[DEBUG]: Test runlevel 3"  2>&1 | tee -a $LOG_FILE
+                echo "[INFO]: System start with runlevel: $level"$'\n' 2>&1 | tee -a $LOG_FILE
                 exit 0
             elif [[ "$level" == "5" ]]; then
-                echo "[INFO]: System start with runlevel $level"
+                echo "[DEBUG]: Test runlevel 5" 2>&1 | tee -a $LOG_FILE
+                echo "[INFO]: System start with runlevel: $level"$'\n' 2>&1 | tee -a $LOG_FILE
                 exit 0
             else
-                echo "[INFO]: System did not start with runlevel $2"
+                echo "[INFO]: System did not start with runlevel: $2"$'\n' 2>&1 | tee -a $LOG_FILE
                 exit 1
             fi
         else
-            echo "[ERROR]: Runlevel other than 3 & 5 are not allowed."
+            echo "[ERROR]: Runlevel other than 3 & 5 are not allowed."$'\n' 2>&1 | tee -a $LOG_FILE
             exit 1
         fi
         ;;
@@ -145,5 +173,5 @@ fi
 
 POSITIONAL=()
 POSITIONAL+=("$@")
-echo DEBUG: arguments: ${POSITIONAL[*]}
+echo "[DEBUG]: commandline: $0 ${POSITIONAL[*]}" 2>&1 | tee -a $LOG_FILE
 main ${POSITIONAL[@]}
