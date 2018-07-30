@@ -4,5 +4,21 @@ LAVA_DIR=$(ls / | grep lava)
 lava_proxy="/$LAVA_DIR/bin/lava-proxy"
 source $lava_proxy
 echo "source $lava_proxy"
+
 echo "install netifaces"
 pip3 install netifaces
+
+if [[ ! -d "/srv/data" ]]; then
+    echo "Creating a directory in /srv/data"
+    mkdir -p /srv/data
+else
+    echo "Directory /srv/data already exist"
+
+echo "mount to nfs..."
+mount nfsserver:/srv/data /srv/data
+
+if [[ $? -eq 0 ]]; then
+    echo "successfully mount to nfs server"
+else
+    echo "An error occur while mount to nfs server"
+fi
