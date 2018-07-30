@@ -40,7 +40,7 @@ def get_hostname():
 
 def create_info_file(data, path, filename='board_info.json'):
     file_json = os.path.join(path, filename)
-    print(json.dumps(data, sort_keys=False, indent=4, separators=(',',': ')))
+    #print(json.dumps(data, sort_keys=False, indent=4, separators=(',',': ')))
     with open(file_json, 'w') as f:
         f.write(json.dumps(data, sort_keys=False, indent=4, separators=(',',': ')))
         f.close()
