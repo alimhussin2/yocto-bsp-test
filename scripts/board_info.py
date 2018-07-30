@@ -61,6 +61,6 @@ def main():
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
-    load_board_info(os.path.join(path, json_file))
+    #load_board_info(os.path.join(path, json_file))
 
 main()
