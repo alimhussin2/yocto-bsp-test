@@ -65,10 +65,10 @@ def main():
     hostname = get_hostname()
     job_id = get_lava_job_id()
     data = {"job_id": job_id, "kernel": kernel, "hostname": hostname, "network": net_info}
-    path = '/home/alim'
+    path = '/home/root'
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
-    load_board_info(os.path.join(path, json_file))
+    #load_board_info(os.path.join(path, json_file))
 
 main()

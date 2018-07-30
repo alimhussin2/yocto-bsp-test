@@ -17,6 +17,8 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
+        - bash scripts/source_lava_proxy
+        - python3 scripts/board_config.py
         - cd scripts/bsps/
         - env
         - ./lava_wait.py
