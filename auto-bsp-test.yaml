@@ -17,7 +17,7 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - bash scripts/source_lava_proxy
+        - bash scripts/board_config
         - python3 scripts/board_info.py
         - cd scripts/bsps/
         - env
