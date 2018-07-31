@@ -12,7 +12,7 @@ import subprocess
 import json
 import re
 import os
-
+from shutil import copyfile
 def get_interfaces():
     return netifaces.interfaces()
 
@@ -55,6 +55,14 @@ def get_lava_job_id():
     list_dir = [f for f in os.listdir('/') if re.match(r'lava',f)]
     return list_dir[0].replace("lava-", "")
 
+def copy_to(src, dest, filename):
+    if not os.path.exists(dest):
+        print('Directory in %s is not exist. Creating it...' % dest)
+        os.makedirs(dest)
+    dest = os.path.join(dest, filename)
+    print('copy from %s to %s' %(src, dest))
+    copyfile(src, dest)
+
 def main():
     data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "hostname": get_hostname(), "network": get_network_info()}
     path = '/home/root'
@@ -62,5 +70,7 @@ def main():
     create_info_file(data, path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
     #load_board_info(os.path.join(path, json_file))
+    dest_board_info = '/home/alim/board_info/' + get_lava_job_id()
+    copy_to(os.path.join(path, json_file), dest_board_info ,'board_info.json')
 
 main()
