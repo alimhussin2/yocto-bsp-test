@@ -70,7 +70,7 @@ def main():
     create_info_file(data, path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
     #load_board_info(os.path.join(path, json_file))
-    dest_board_info = '/home/alim/board_info/' + get_lava_job_id()
+    dest_board_info = '/srv/data/board_info/' + get_lava_job_id()
     copy_to(os.path.join(path, json_file), dest_board_info ,'board_info.json')
 
 main()
