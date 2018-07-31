@@ -59,6 +59,7 @@ def copy_to(src, dest, filename):
     if not os.path.exists(dest):
         print('Directory in %s is not exist. Creating it...' % dest)
         os.makedirs(dest)
+        os.chmod(dest, 0o777)
     dest = os.path.join(dest, filename)
     print('copy from %s to %s' %(src, dest))
     copyfile(src, dest)
@@ -70,7 +71,7 @@ def main():
     create_info_file(data, path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
     #load_board_info(os.path.join(path, json_file))
-    dest_board_info = '/srv/data/board_info/' + get_lava_job_id()
+    dest_board_info = '/srv/data/LAVA/lava-job/' + get_lava_job_id()
     copy_to(os.path.join(path, json_file), dest_board_info ,'board_info.json')
 
 main()
