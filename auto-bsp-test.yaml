@@ -19,9 +19,8 @@ run:
         - chmod 755 -R scripts
         - bash scripts/board_config
         - python3 scripts/board_info.py
-        - cd scripts/bsps/
         - env
-        - ./lava_wait.py
+        - bash scripts/lava_wait.py
         
 parse:
     pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
