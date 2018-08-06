@@ -1,0 +1,29 @@
+#!/bin/bash
+
+LAVA_DIR=$(ls / | grep lava)
+LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
+#source $LAVA_PROXY
+#echo "source $LAVA_PROXY"
+lava-test-case "configure proxy" --shell "source $LAVA_PROXY" 
+
+#echo "install netifaces"
+#pip3 install netifaces
+lava-test-case "install netifaces" --shell "pip3 install netifaces"
+
+if [[ ! -d "/srv/data" ]]; then
+    mkdir -p /srv/data
+    echo "Creating a dirctory in /srv/data"
+else
+    echo "Directory /srv/data exists"
+fi
+echo "mount to nfs server"
+#mount nfsserver:/srv/data /srv/data
+lava-test-case "mount NFS" --shell "mount nfsserver:/srv/data /srv/data"
+
+if [[ $? -eq 0 ]]; then
+    echo "Successfully mount to nfs server"
+else
+    echo "An error occur. Unable to mount to nfs server"
+fi
+
+lava-test-case "board info" --shell "python3 board_info.py"
