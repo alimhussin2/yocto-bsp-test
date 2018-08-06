@@ -17,7 +17,8 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - bash scripts/board_config_lava
+        - bash scripts/board_config
+        - python3 scripts/board_info.py
         - env
         - cd scripts
         - python3 lava_wait.py
