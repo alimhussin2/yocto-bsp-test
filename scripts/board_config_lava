@@ -6,9 +6,9 @@ LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 #echo "source $LAVA_PROXY"
 lava-test-case "configure_proxy" --shell "source $LAVA_PROXY" 
 
-#echo "install netifaces"
-#pip3 install netifaces
 lava-test-case "install_netifaces" --shell "pip3 install netifaces"
+echo "install netifaces"
+pip3 install netifaces
 
 if [[ ! -d "/srv/data" ]]; then
     mkdir -p /srv/data
