@@ -1,0 +1,29 @@
+metadata:
+    name: base-config
+    format: "Lava-Test-Shell device config 1.0"
+    description: "Configure device wth proxy"
+    version: 1.0
+    maintainer: 
+        - alimhussin2@gmail.com
+    os:
+        - oe
+    devices:
+        - minnowboard
+        - beaglebone
+    scope:
+        - functional
+    environment:
+        - lava-test-shell
+run:
+    steps:
+        - ls -l
+        - chmod 755 -R scripts
+        - bash scripts/board_config
+        - python3 scripts/board_info.py
+        
+parse:
+    pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
+    fixupdict:
+        ERROR: fail
+        FAIL: fail
+        PASS: pass
