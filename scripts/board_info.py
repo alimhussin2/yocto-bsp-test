@@ -64,8 +64,11 @@ def copy_to(src, dest, filename):
     print('copy from %s to %s' %(src, dest))
     copyfile(src, dest)
 
+def get_user():
+    return subprocess.check_output(['whoami']).decode()
+
 def main():
-    data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "hostname": get_hostname(), "network": get_network_info()}
+    data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": get_network_info()}
     path = '/home/root'
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
