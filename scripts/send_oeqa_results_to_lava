@@ -1,0 +1,29 @@
+#!/bin/bash
+
+RESULT_FILE="$1"
+TEMP_RESULT="/tmp/temp_results.log"
+
+which lava-test-case > /dev/null 2>&1
+lava_test_case="$?"
+
+if [[ -f "$RESULT_FILE" ]]; then
+    cat $RESULT_FILE | grep "RESULTS" >> $TEMP_RESULT
+    cat $TEMP_RESULT | while read -r line; do
+        if echo "$line" | egrep -e "(PASSED|FAIL|SKIPPED)"; then
+            test="$(echo $line | awk '{print $3}')"
+            result="$(echo $line | awk '{print $7}')"
+            measurement="$(echo $line | awk '{print $8}')"
+            measurement="${measurement//[^0-9.]/}"
+            unit="$(echo $line | awk '{print $8}')"
+            unit="${unit//[^a-z]/}"
+            if [[ $lava_test_case -eq 0 ]]; then
+                lava-test-case "$test" --result "$result" --measurement "$measurement" --unit "$unit"
+            else
+                echo '<TEST_CASE_ID="$test" RESULT="$result" MEASUREMENT="$measurement" UNIT="$unit">'
+            fi
+        fi
+    done
+    rm $TEMP_RESULT
+else
+    echo "Error: Result file missing"
+fi
