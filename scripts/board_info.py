@@ -31,10 +31,10 @@ def get_network_info():
     return nets
 
 def get_kernel_version():
-    return subprocess.check_output(['uname', '-r']).decode()
+    return subprocess.check_output(['uname', '-r']).decode().strip('\n')
 
 def get_hostname():
-    return subprocess.check_output(['hostname']).decode()
+    return subprocess.check_output(['hostname']).decode().strip('\n')
 
 def create_info_file(data, path, filename='board_info.json'):
     file_json = os.path.join(path, filename)
@@ -65,7 +65,7 @@ def copy_to(src, dest, filename):
     copyfile(src, dest)
 
 def get_user():
-    return subprocess.check_output(['whoami']).decode()
+    return subprocess.check_output(['whoami']).decode().strip('\n')
 
 def main():
     data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": get_network_info()}
