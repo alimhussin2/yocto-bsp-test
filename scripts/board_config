@@ -1,25 +1,43 @@
 #!/bin/bash
 
+CONF_DIR="/srv/data/LAVA/config"
 LAVA_DIR=$(ls / | grep lava)
 LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
-source $LAVA_PROXY
-echo "source $LAVA_PROXY"
 
-echo "install netifaces"
+source $LAVA_PROXY
+echo "[  INFO  ] Set proxy"
+
+echo "[  INFO  ] Install netifaces"
 pip3 install netifaces
 
 if [[ ! -d "/srv/data" ]]; then
     mkdir -p /srv/data
-    echo "Creating a dirctory in /srv/data"
+    echo "[  INFO  ] Creating a dirctory in /srv/data"
 else
-    echo "Directory /srv/data exists"
+    echo "[  INFO  ] Directory /srv/data exists"
 fi
-echo "mount to nfs server"
+echo "[  INFO  ] Mount to nfs server"
 mount nfsserver:/srv/data /srv/data
 
+echo "[  INFO  ] Set hostname"
+sed -i "s/localhost.localdomain/`hostname`/g" /etc/hosts
+
 if [[ $? -eq 0 ]]; then
-    echo "Successfully mount to nfs server"
+    echo "[  OK  ] Successfully mount to nfs server"
+    echo "[  INFO  ] Configure vncserver"
+    mkdir ~/.vnc
+    cp $CONF_DIR/vnc/vnc_config ~/.vnc/passwd;
+    chmod 600 ~/.vnc/passwd
+    vncserver :1; vncserver -kill :1
+    rm ~/.vnc/xstartup
+    cp $CONF_DIR/vnc/xstartup ~/.vnc/xstartup; chmod +x ~/.vnc/xstartup
+    vncserver :1
+    if [[ $? -eq 0 ]]; then
+        echo "[  OK  ] Vnc start at :1"
+    else 
+        echo "[  ERROR  ] Unable to start vnc"
+    fi
 else
-    echo "An error occur. Unable to mount to nfs server"
+    echo "[  ERROR  ] Unable to mount to nfs server"
 fi
 
