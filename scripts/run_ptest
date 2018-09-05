@@ -4,7 +4,7 @@ RESULTS_DIR="/home/root/ptest-results"
 NFS_DIR="/srv/data/LAVA/lava-job"
 
 which ptest-runner
-if [[ $0 ! -eq 0 ]]; then
+if [[ ! $0 -eq 0 ]]; then
     echo "[  ERROR  ] Ptest-runner is not install"
     exit 1
 fi
