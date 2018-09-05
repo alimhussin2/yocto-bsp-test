@@ -23,7 +23,7 @@ for pt in $ptest_list;
 do
     echo "ptest: $pt"
     lava-test-case "ptest-runner-$pt" --shell "ptest-runner $pt 2>&1 | tee $RESULTS_DIR/$pt.log"
-    cp -r $RESULTS $NFS_DIR/$JOB_ID
+    cp -r $RESULTS_DIR $NFS_DIR/$JOB_ID
 done
 
 echo "[  INFO  ] ptest-runner completed"
