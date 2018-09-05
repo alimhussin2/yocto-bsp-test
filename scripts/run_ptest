@@ -17,13 +17,18 @@ if [ ! -d $RESULTS_DIR ]; then
     mkdir $RESULTS_DIR
 fi
 
+if [ ! -d "$NFS_DIR/ptest-results" ]; then
+    echo "[  INFO  ] Creating $NFS_DIR/ptest-results"
+    mkdir $NFS_DIR/ptest-results
+fi
+
 echo "[  INFO  ] ptest-runner started"
 ptest_list=`ptest-runner -l | awk -F ' ' '{ print $1 }'`
 for pt in $ptest_list;
 do
     echo "ptest: $pt"
     lava-test-case "ptest-runner-$pt" --shell "ptest-runner $pt 2>&1 | tee $RESULTS_DIR/$pt.log"
-    cp -r $RESULTS_DIR $NFS_DIR/$JOB_ID
+    cp $RESULTS_DIR/$pt.log $NFS_DIR/$JOB_ID
 done
 
 echo "[  INFO  ] ptest-runner completed"
