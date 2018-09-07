@@ -8,10 +8,10 @@ source $LAVA_PROXY
 echo "[  INFO  ] Set proxy"
 
 echo "[  INFO  ] Install netifaces"
-pip3 install netifaces
+pip3 install --proxy=$http_proxy netifaces
 
 echo "[  INFO  ] Install buildbot-worker"
-pip3 install buildbot-worker
+pip3 install --proxy=$http_proxy buildbot-worker
 git clone https://git.yoctoproject.org/git/yocto-autobuilder2
 git clone https://git.yoctoproject.org/git/yocto-autobuilder-helper
 buildbot-worker create-worker --umask=0o22 ~/yocto-worker $YOCTO_CONTROLLER `hostname` $BUILDBOT_PASS
