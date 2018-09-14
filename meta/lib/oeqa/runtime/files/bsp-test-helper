@@ -47,10 +47,14 @@ case "$1" in
             elif [[ ${sd_sizes[0]} < ${sd_sizes[1]} ]];then
                 HDD="/dev/${sd_devices[1]}"
                 THUMB_DRIVE="/dev/${sd_devices[0]}"
-                echo "[INFO]: HDD is $HDD, size = $${sd_sizes[1]}" 2>&1 | tee -a $LOG_FILE
+                echo "[INFO]: HDD is $HDD, size = ${sd_sizes[1]}" 2>&1 | tee -a $LOG_FILE
                 echo "[INFO]: THUMB DRIVE = $THUMB_DRIVE, size = ${sd_sizes[0]}" 2>&1 | tee -a $LOG_FILE
             else
-                echo "[ERROR]: Cannot validate scsi devices." 2>&1 | tee -a $LOG_FILE
+                echo "[INFO]: The devices have same size. Just mount to any of them. " 2>&1 | tee -a $LOG_FILE
+                HDD="/dev/${sd_sizes[0]}"
+                THUMB_DRIVE="/dev/${sd_sizes[1]}"
+                echo "[INFO]: HDD is $HDD, size = ${sd_sizes[0]}" 2>&1 | tee -a $LOG_FILE
+                echo "[INFO]: THUMB DRIVE = $THUMB_DRIVE, size = ${sd_sizes[1]}" 2>&1 | tee -a $LOG_FILE
             fi
         else 
             THUMB_DRIVE="/dev/$sd_devices"
