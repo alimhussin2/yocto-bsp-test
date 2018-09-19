@@ -129,6 +129,9 @@ option() {
                 UPLOADED_DIR=$2
                 lava_job=`ls / | grep lava`; lava_id=${lava_job/lava-/}
                 UPLOADED_DIR="$UPLOADED_DIR/$lava_id"
+                if [[ ! -d $UPLOADED_DIR ]]; then
+                    mkdir $UPLOADED_DIR
+                fi
                 echo "Upload result to $UPLOADED_DIR"
                 cp $RESULT_COMPONENTS $UPLOADED_DIR
                 cp $LOGFILE $UPLOADED_DIR
