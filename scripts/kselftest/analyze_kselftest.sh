@@ -79,7 +79,7 @@ list_components_result() {
 }
 
 details_by_components() {
-    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
     while true;
     do
         component=$(head -n1 $RESULT_TEMP)
