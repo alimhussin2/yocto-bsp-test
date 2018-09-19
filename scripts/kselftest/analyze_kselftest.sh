@@ -12,8 +12,9 @@ RESULT_SUMMARY="results-summary-$LOGFILE"
 RESULT_COMPONENTS="results-by-component-$LOGFILE"
 
 usage() {
-    echo "Usage :$0 [-u|--url,    url of kselftest]
-                    [-U|--upload, path to uploaded file]"
+    echo "Usage :$0 [-u|--url,                  url of kselftest]
+                    [-U|--upload,               path to uploaded file]
+                    [-a|--analyze [filename],   analyze kselftest result]"
     exit 1
 }
 parse_output() {
@@ -55,7 +56,7 @@ details() {
 }
 
 list_components_result() {
-    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' > $RESULT_TEMP
     echo "Summary by components"
     echo "============================="
     local n=0
@@ -78,7 +79,7 @@ list_components_result() {
 }
 
 details_by_components() {
-    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' > $RESULT_TEMP
     while true;
     do
         component=$(head -n1 $RESULT_TEMP)
@@ -164,6 +165,19 @@ option() {
                 echo "Upload result to $UPLOADED_DIR"
                 cp $RESULT_COMPONENTS $UPLOADED_DIR
                 cp $LOGFILE $UPLOADED_DIR
+                exit 0
+            ;;
+            -a|--analyze)
+                echo "Analyze kselftest results"
+                if [[ -z "$2" ]]; then
+                    echo "Kselftest results file missing. Abort"
+                    usage
+                else
+                    LOGFILE=$2
+                    OUTPUT_ANALYZE=results-by-component-$LOGFILE
+                    analyze_kselftest_results >> $OUTPUT_ANALYZE
+                    echo "Complete analyzing kselftest results"
+                fi
                 exit 0
             ;;
             *)
