@@ -123,6 +123,7 @@ option() {
                     if [[ -f "$RESULT_COMPONENTS" ]]; then
                         rm -f "$RESULT_SUMMARY" "$RESULT_COMPONENTS"
                     fi
+                    ./run_kselftest.sh 2>&1 | tee ${LOGFILE}
                     analyze_kselftest_results >> $RESULT_COMPONENTS
                 else
                     echo "Unable to execute kselftest. No url given"
