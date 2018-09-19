@@ -169,6 +169,7 @@ option() {
                 echo "Upload result to $UPLOADED_DIR"
                 cp $RESULT_COMPONENTS $UPLOADED_DIR
                 cp $LOGFILE $UPLOADED_DIR
+                cleanup
                 exit 0
             ;;
             -a|--analyze)
@@ -182,6 +183,7 @@ option() {
                     analyze_kselftest_results >> $OUTPUT_ANALYZE
                     echo "Complete analyzing kselftest results"
                 fi
+                cleanup
                 exit 0
             ;;
             *)
