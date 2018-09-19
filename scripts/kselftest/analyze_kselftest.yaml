@@ -17,10 +17,9 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - bash scripts/board_config
-        - python3 scripts/board_info.py
-        - cd scripts/kselftest
-        - bash analyze_kselftest.sh --url default --upload "/srv/data/LAVA/lava-job"
+        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
+        - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
+        - lava-test-case  "run_kselftest" --shell "bash scripts/kselftest/analyze_kselftest.sh --url default --upload '/srv/data/LAVA/lava-job'"
         - python3 lava_wait.py
         
 parse:
