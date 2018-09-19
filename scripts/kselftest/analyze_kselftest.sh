@@ -54,6 +54,29 @@ details() {
     grep "SKIP" ${RESULT_FILE}
 }
 
+list_components_result() {
+    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    echo "Summary by components"
+    echo "============================="
+    local n=0
+    while true;
+    do
+        local components=$(head -n1 $RESULT_TEMP)
+        if [[ -z $components ]]; then
+            break
+        else
+            cpass=`cat $RESULT_FILE | grep PASS | grep $components | wc -l`
+            cfail=`cat $RESULT_FILE | grep FAIL | grep $components | wc -l`
+            cskip=`cat $RESULT_FILE | grep SKIP | grep $components | wc -l`
+            sed -i "/$components/d" $RESULT_TEMP
+            echo "   $components:  (PASS=$cpass | FAIL=$cfail | SKIP=$cskip)"
+            n=$(( n+1 ))
+        fi
+    done
+    echo -e "\n============================"
+    echo -e "Total components tested: $n\n\n"
+}
+
 details_by_components() {
     cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
     while true;
@@ -100,6 +123,7 @@ analyze_kselftest_results() {
     parse_output
     info
     summary
+    list_components_result
     details_by_components
 }
 
