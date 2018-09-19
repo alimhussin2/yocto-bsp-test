@@ -128,6 +128,10 @@ analyze_kselftest_results() {
     details_by_components
 }
 
+cleanup() {
+    rm $LOGFILE_TEMP $RESULT_TEMP $RESULT_FILE
+}
+
 option() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -200,4 +204,4 @@ main() {
 POSITIONAL=()
 POSITIONAL+=("$@")
 main "${POSITIONAL[@]}"
-
+cleanup
