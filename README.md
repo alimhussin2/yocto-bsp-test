@@ -1,5 +1,5 @@
 # yocto-bsp-test
-This repo contain example code for automated board support packages (BSP) test on Yocto Project with LAVA.
+This repo contain example of codes for automated board support packages (BSP) tests on Yocto Project with LAVA. The tests include ptest, kselftest, Linux Test Project (LTP) and more. LAVA has a capability to deploy image such as Yocto Project on board, boot up and run the test.
 
 ## example-lava-job
 These are some examples of LAVA jobs definition to boot the device using USB and network boot.
