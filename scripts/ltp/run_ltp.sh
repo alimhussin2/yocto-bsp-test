@@ -46,7 +46,7 @@ cp install_ltp.log $UPLOAD_DIR
 cd /otp/ltp
 echo "[  INFO  ] Run LTP"
 
-testcases=`ls /opt/ltp`
+testcases=`ls /opt/ltp/runtest`
 for t in ${testcases[@]}; do
     echo "[  INFO  ] Testing $t"
     ./runltp -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
