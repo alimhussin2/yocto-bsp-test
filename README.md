@@ -1,11 +1,15 @@
 # yocto-bsp-test
-Maintainer: alimhussin2@gmail.com
-Date: Mei 2018
-Descriptions: This repo contain example code for automated board support packages (BSP) test on Yocto Project with LAVA.
+This repo contain example code for automated board support packages (BSP) test on Yocto Project with LAVA.
 
-example-lava-job
-  These are example LAVA job definition to boot the device using USB and network boot.
+## example-lava-job
+These are some examples of LAVA jobs definition to boot the device using USB and network boot.
+ - [USB boot (example-lava-job/minnowboard-job-USB-boot.yaml)]
+ - [network boot (example-lava-job/minnowboard-job-newtork-boot.yaml)]
 
-# References: 
-BSP test: https://wiki.yoctoproject.org/wiki/BSP_Test_Plan
-Yocto Project repository: https://git.yoctoproject.org/cgit/cgit.cgi/poky/
+## Author
+ - Alim Hussin  
+
+## References 
+ - Yocto Project BSP test plan: https://wiki.yoctoproject.org/wiki/BSP_Test_Plan
+ - Yocto Project repository: https://git.yoctoproject.org/cgit/cgit.cgi/poky/
+ - Linaro LAVA: https://git.linaro.org/lava/lava.git/
