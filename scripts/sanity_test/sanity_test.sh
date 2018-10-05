@@ -8,7 +8,8 @@ echo "check kernel version" 2>&1 | tee $RESULT
 uname -a 2>&1 | tee -a $RESULT
 
 echo "check dmesg" 2>&1 | tee -a $RESULT
-dmesg | grep -i -e 'error|fail' 2>&1 | tee -a $RESULT
+echo "------------------" 2>&1 | tee -a $RESULT
+dmesg | grep -i -E 'error|fail' 2>&1 | tee -a $RESULT
 
 # upload result
 lava_job=`ls / | grep lava`
