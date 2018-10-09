@@ -13,8 +13,7 @@ if [[ ! $? -eq 0 ]]; then
     lava_show_ipaddr="/$LAVA_DIR/bin/lava-echo-ipv4"
 fi
 for iface in $interfaces; do
-    $IPADDR="$lava_show_ipaddr $iface"
-    echo "[  INFO  ] Board boot up successfully. Board ipaddr is $IPADDR"
+    echo "[  INFO  ] Board boot up successfully. Board ipaddr is `bash $lava_show_ipaddr $iface`"
 done
 
 echo "[  INFO  ] Install netifaces"
