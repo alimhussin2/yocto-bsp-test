@@ -7,6 +7,16 @@ LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 source $LAVA_PROXY
 echo "[  INFO  ] Set proxy"
 
+interfaces=`ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]' | awk -F ' ' '{ print $1 }'`
+lava_show_ipaddr=`which lava-echo-ipv4`
+if [[ ! $? -eq 0 ]]; then
+    lava_show_ipaddr="/$LAVA_DIR/bin/lava-echo-ipv4"
+fi
+for iface in $interfaces; do
+    $IPADDR="$lava_show_ipaddr $iface"
+    echo "[  INFO  ] Board boot up successfully. Board ipaddr is $IPADDR"
+done
+
 echo "[  INFO  ] Install netifaces"
 pip3 install --proxy=$http_proxy netifaces
 
