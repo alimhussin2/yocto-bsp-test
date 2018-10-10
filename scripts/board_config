@@ -8,6 +8,7 @@ source $LAVA_PROXY
 echo "[  INFO  ] Set proxy"
 
 echo "[  INFO  ] Detecting network interface"
+sleep 5
 while [ 1 ]; do
     interfaces=`ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]' | awk -F ' ' '{ print $1 }'`
     if [[ ! -z $interfaces ]]; then
