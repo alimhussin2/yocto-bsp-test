@@ -7,7 +7,18 @@ LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 source $LAVA_PROXY
 echo "[  INFO  ] Set proxy"
 
-interfaces=`ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]' | awk -F ' ' '{ print $1 }'`
+echo "[  INFO  ] Detecting network interface"
+while [ 1 ]; do
+    interfaces=`ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]' | awk -F ' ' '{ print $1 }'`
+    if [[ ! -z $interfaces ]]; then
+        break
+    fi
+    [ "$retry" == "3" ] && break
+    echo "[  RETRY  ] Detecting network interface"
+    sleep 5
+    retry=$(( retry+1 ))
+done
+
 lava_show_ipaddr=`which lava-echo-ipv4`
 if [[ ! $? -eq 0 ]]; then
     lava_show_ipaddr="/$LAVA_DIR/bin/lava-echo-ipv4"
