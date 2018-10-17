@@ -1,6 +1,6 @@
 #!/bin/bash
 
-timeout=7200  # seconds
+timeout=43200  # seconds
 
 run_timer() {
 local timer=0
