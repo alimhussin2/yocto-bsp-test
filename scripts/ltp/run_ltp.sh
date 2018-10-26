@@ -5,7 +5,11 @@
 LTP_REPO="ltp.tar.xz"
 NFS_DIR="/srv/data/LAVA/kernel"
 UPLOAD_DIR="/srv/data/LAVA/lava-job"
+lava_job=`ls / | grep lava`
+lava_id=${lava_job/lava-/}
+LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 
+source $LAVA_PROXY
 cd $HOME
 echo "[  INFO  ] Clone from linux test project repo"
 git clone https://github.com/linux-test-project/ltp.git
@@ -18,8 +22,6 @@ if [[ ! $? -eq 0 ]]; then
     tar -xJf $HOME/$LTP_REPO
 fi
 
-lava_job=`ls / | grep lava`
-lava_id=${lava_job/lava-/}
 UPLOAD_DIR="$UPLOAD_DIR/$lava_id/ltp_results"
 
 if [[ ! -d "$UPLOAD_DIR" ]]; then
