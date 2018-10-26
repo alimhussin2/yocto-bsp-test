@@ -43,12 +43,16 @@ echo "[  INFO  ] Install LTP"
 make install 2>&1 | tee install_ltp.log
 cp install_ltp.log $UPLOAD_DIR
 
-PATH="$PATH:/otp/ltp"
-
+export PATH="$PATH:/otp/ltp"
+ltp_path=`which runltp`
 echo "[  INFO  ] Run LTP"
 
 testcases=`ls /opt/ltp/runtest`
 for t in ${testcases[@]}; do
     echo "[  INFO  ] Testing $t"
-    runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+    if [[ ! -z $ltp_path ]]; then
+        runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+    else
+       ./opt/ltp/runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+   fi
 done
