@@ -7,12 +7,18 @@
 #  - paramiko
 # to install use pip. Example, pip3 install paramiko
 
-import netifaces
 import subprocess
 import json
 import re
 import os
 from shutil import copyfile
+
+try:
+    import netifaces
+except ImportError:
+    print("Module netifaces not install in the system. To install use pip3 install netifaces")
+    exit()
+
 def get_interfaces():
     return netifaces.interfaces()
 
