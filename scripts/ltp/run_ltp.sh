@@ -5,8 +5,8 @@
 LTP_REPO="ltp.tar.xz"
 NFS_DIR="/srv/data/LAVA/kernel"
 UPLOAD_DIR="/srv/data/LAVA/lava-job"
-lava_job=`ls / | grep lava`
-lava_id=${lava_job/lava-/}
+LAVA_DIR=`ls / | grep lava`
+lava_id=${LAVA_DIR/lava-/}
 LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 
 source $LAVA_PROXY
