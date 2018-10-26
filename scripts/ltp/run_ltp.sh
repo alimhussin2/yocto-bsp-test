@@ -53,6 +53,6 @@ for t in ${testcases[@]}; do
     if [[ ! -z $ltp_path ]]; then
         runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
     else
-       /otp/ltp/runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+       /opt/ltp/runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
    fi
 done
