@@ -8,6 +8,7 @@ UPLOAD_DIR="/srv/data/LAVA/lava-job"
 LAVA_DIR=`ls / | grep lava`
 lava_id=${LAVA_DIR/lava-/}
 LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
+SKIPFILES="skipfiles/skipfile-mturbot"
 
 source $LAVA_PROXY
 cd $HOME
@@ -53,8 +54,8 @@ testcases=`ls /opt/ltp/runtest`
 for t in ${testcases[@]}; do
     echo "[  INFO  ] Testing $t"
     if [[ ! -z $ltp_path ]]; then
-        runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+        runltp -p -f $t -S $SKIPFILES -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
     else
-       /opt/ltp/runltp -p -f $t -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
+       /opt/ltp/runltp -p -f $t -S $SKIPFILES -l $UPLOAD_DIR/$t-`date +"%Y_%m_%d-%H_%M_%S"`.log
    fi
 done
