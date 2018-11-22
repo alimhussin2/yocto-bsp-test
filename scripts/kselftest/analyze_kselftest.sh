@@ -56,9 +56,10 @@ details() {
 }
 
 list_components_result() {
-    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' | grep -v "test" > $RESULT_TEMP
     echo "Summary by components"
     echo "============================="
+    echo "  Components, Pass, Fail, Skip"
     local n=0
     while true;
     do
@@ -70,7 +71,8 @@ list_components_result() {
             cfail=`cat $RESULT_FILE | grep FAIL | grep $components | wc -l`
             cskip=`cat $RESULT_FILE | grep SKIP | grep $components | wc -l`
             sed -i "/$components/d" $RESULT_TEMP
-            echo "   $components:  (PASS=$cpass | FAIL=$cfail | SKIP=$cskip)"
+            #echo "   $components:  (PASS=$cpass | FAIL=$cfail | SKIP=$cskip)"
+            echo "  $components, $cpass, $cfail, $cskip"
             n=$(( n+1 ))
         fi
     done
@@ -79,7 +81,7 @@ list_components_result() {
 }
 
 details_by_components() {
-    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' | grep -v "test" > $RESULT_TEMP
     while true;
     do
         component=$(head -n1 $RESULT_TEMP)
