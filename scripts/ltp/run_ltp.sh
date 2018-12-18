@@ -16,7 +16,7 @@ echo "[  INFO  ] Clone from linux test project repo"
 git clone https://github.com/linux-test-project/ltp.git
 
 if [[ ! $? -eq 0 ]]; then
-    echo "[  ERROR  ] Unable to clone from remote repo as proxy was not configure."
+    echo "[  ERROR  ] Unable to clone from remote repo."
     echo "[  INFO  ] Copy from NFS: $NFS_DIR"
     cp $NFS_DIR/$LTP_REPO $HOME
     echo "[  INFO  ] Extracting $LTP_REPO"
