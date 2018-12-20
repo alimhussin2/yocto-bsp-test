@@ -18,6 +18,15 @@ usage() {
                     [-a|--analyze [filename],   analyze kselftest result]"
     exit 1
 }
+
+set_proxy() {
+    LAVA_DIR=$(ls / | grep lava)
+    LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
+
+    source $LAVA_PROXY
+    echo "[  INFO  ] Set proxy"
+}
+
 parse_output() {
     sed -r 's/(.*selftests: (\S+): (\S+) \[(.*)\])/\1\nselftests: \2_\3 [\4]/' "${LOGFILE}" > "${LOGFILE_TEMP}"
     grep "selftests:" "${LOGFILE_TEMP}" > "${RESULT_FILE}"
@@ -141,6 +150,7 @@ option() {
             -u|--url)
                 if [[ ! -z "$2" ]]; then
                     if [[ "$2" == "default" ]]; then
+                        set_proxy
                         echo "Download kselftest from kernel mirror"
                         version=`uname -r`
                         kernel_version=${version//[a-zA-Z-]/}
