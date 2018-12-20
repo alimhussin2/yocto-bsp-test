@@ -3,6 +3,7 @@
 # Description: Download kselftest, run & parse the result. 
 # The output result is results-summary-kselftest-version.log
 
+LINUX_MIRROR="http://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/"
 DEFAULT_KSELFTEST="/srv/data/LAVA/kernel/kselftest-4.14.tar.gz"
 LOGFILE="kselftest-`uname -r`.log"
 RESULT_FILE="results-$LOGFILE"
@@ -140,21 +141,28 @@ option() {
             -u|--url)
                 if [[ ! -z "$2" ]]; then
                     if [[ "$2" == "default" ]]; then
-                        echo "Download kselftest from local directory"
-                        cp $DEFAULT_KSELFTEST .
+                        echo "Download kselftest from kernel mirror"
+                        version=`uname -r`
+                        kernel_version=${version//[a-zA-Z-]/}
+                        echo "Downloading ${LINUX_MIRROR}/linux-${kernel_version}.tar.xz"
+                        wget ${LINUX_MIRROR}/linux-${kernel_version}.tar.xz
                     elif [[ -z "${2##*http*}" ]]; then
                         echo "Download kselftest from given url"
-                        wget $2 -O kselftest-4.14.tar.gz
+                        wget $2 -O linux-$kernel_version.tar.xz
                     else
                         echo "Input error. See usage"
                         usage
                     fi
-                    tar xf "kselftest-4.14.tar.gz"
-                    cd "kselftest"
+                    if [ -f "linux-${kernel_version}.tar.xz" ]; then
+                        tar -xJf "linux-${kernel_version}.tar.xz"
+                    else
+                        echo "[  Error  ] linux-${kernel_version}.tar.xz not found!"
+                        exit 1
+                    fi
                     if [[ -f "$RESULT_COMPONENTS" ]]; then
                         rm -f "$RESULT_SUMMARY" "$RESULT_COMPONENTS"
                     fi
-                    ./run_kselftest.sh 2>&1 | tee ${LOGFILE}
+                    make -C $PWD/linux-$kernel_version/tools/testing/selftests run_tests 2>&1 | tee ${LOGFILE}
                     analyze_kselftest_results >> $RESULT_COMPONENTS
                 else
                     echo "Unable to execute kselftest. No url given"
