@@ -3,7 +3,7 @@
 # Description: Download kselftest, run & parse the result. 
 # The output result is results-summary-kselftest-version.log
 
-LINUX_MIRROR="http://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/"
+LINUX_MIRROR="http://mirrors.edge.kernel.org/pub/linux/kernel/v4.x"
 DEFAULT_KSELFTEST="/srv/data/LAVA/kernel/kselftest-4.14.tar.gz"
 LOGFILE="kselftest-`uname -r`.log"
 RESULT_FILE="results-$LOGFILE"
