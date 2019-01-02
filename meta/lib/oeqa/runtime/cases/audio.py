@@ -2,10 +2,15 @@ import logging
 import subprocess
 from shutil import rmtree
 from oeqa.runtime.case import OERuntimeTestCase
-from oeqa.core.decorator.depends import OETestDepends
+#from oeqa.core.decorator.depends import OETestDepends
 from oeqa.core.decorator.oeid import OETestID
 
 class AudioTest(OERuntimeTestCase):
+    def detect_audio_device(self):
+        cmd = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print $1 }' > /tmp/audio_device"
+        self.device = subprocess.check_output('%s' % cmd, shell=True).decode().lower()
+        return self.device
+
     def generate_fingerprint(self, audio_file):
         output = []
         cmd = subprocess.check_output(['/usr/bin/fpcalc', '-raw', audio_file]).decode()
@@ -103,7 +108,12 @@ class AudioTest(OERuntimeTestCase):
         self.recorded_audio = 'test_loopback_kc_stronger_16bit.wav'
         self.path_original_audio = os.path.join(self.tc.runtime_files_dir, self.original_audio)
         self.path_recorded_audio = ('/tmp/%s' % self.recorded_audio)
-        cmd = ('arecord -D iec958:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.path_recorded_audio, self.original_audio))
+        status, output = self.tc.target.run(self.detect_audio_device())
+        msg = ('Audio device not exist. %s' % output)
+        self.assertEqual(status, 0, msg=msg)
+        # check audio device that connected to host machine. In this case, audio device was connected to DUT.
+        self.device = self.tc.target.run(self.detect_audio_device())
+        cmd = ('arecord -D `cat %s`:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.device, self.path_recorded_audio, self.original_audio))
 
         status, output = self.tc.target.run(cmd)
         msg = ('Unable to record audio. %s' % output)
