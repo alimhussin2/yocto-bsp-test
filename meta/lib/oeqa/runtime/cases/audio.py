@@ -2,13 +2,12 @@ import logging
 import subprocess
 from shutil import rmtree
 from oeqa.runtime.case import OERuntimeTestCase
-#from oeqa.core.decorator.depends import OETestDepends
 from oeqa.core.decorator.oeid import OETestID
 
 class AudioTest(OERuntimeTestCase):
     def detect_audio_device(self):
-        cmd = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print $1 }' > /tmp/audio_device"
-        self.device = subprocess.check_output('%s' % cmd, shell=True).decode().lower()
+        cmd = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print tolower($1) }' | tee /tmp/audio_device"
+        self.device = subprocess.check_output('%s' % cmd, shell=True).decode()
         return self.device
 
     def generate_fingerprint(self, audio_file):
@@ -23,8 +22,6 @@ class AudioTest(OERuntimeTestCase):
     def check_similarity(self, original_audio, recorded_audio):
         fp_original = self.generate_fingerprint(original_audio)
         fp_recorded = self.generate_fingerprint(recorded_audio)
-        #print(fp_original)
-        #print(fp_recorded)
 
         match = 0
         mismatch = 0
@@ -39,9 +36,6 @@ class AudioTest(OERuntimeTestCase):
         10 samples and recorded has 8 samples, then only compare
         first 8 samples.
         '''
-        print('fp_original=%s' % fp_original)
-        #print('original_audio=%s, record_audio=%s' % (original_audio, recorded_audio))
-        #print('len ori = %d, len record = %d, original_audio=%s record_audio=%s' % (len(fp_original), len(fp_recorded), original_audio, recorded_audio))
         if len(fp_original) < len(fp_recorded):
             sample_length = int(len(fp_original))
             print('use fp_original length = %d' % sample_length)
@@ -50,7 +44,6 @@ class AudioTest(OERuntimeTestCase):
             print('use fp_recorded length = %d' % sample_length)
 
         for index in range(sample_length):
-            #length_bin = len(bin(int(fp_recorded[index])))
             result = int(fp_recorded[index]) ^ int(fp_original[index])
             '''
             convert result to binary. Calculate total number of 1.
@@ -79,41 +72,29 @@ class AudioTest(OERuntimeTestCase):
         print('length_bin_stream = %d' % length_bin_stream)
         print('total_error = %d' % total_error)
         print('accurancy = %.2f%%' % accuracy)
-        #if accuracy > 70.0:
-        #     print("[  PASS  ] Audio match with similarity of %.2f%%" % accuracy)
-        #else:
-        #    print("[  FAIL  ] Audio mismatch with similarity of %.2f%%" % accuracy)
         return accuracy
 
     @classmethod
     def setUpClass(cls):
         original_audio = 'kc_stronger_16bit.wav'
-        #src = os.path.join(cls.tc.runtime_files_dir, 'sine_wave_900hz_16bit.wav')
-        #dest = '/tmp/sine_wave_900hz_16bit.wav'
         src = os.path.join(cls.tc.runtime_files_dir, original_audio)
         dest = '/tmp/%s' % original_audio
-
         cls.tc.target.copyTo(src, dest)
 
     def test_audio_over_jack(self):
         passing_rate = 80.0
-        #self.original_audio = os.path.join(self.tc.runtime_files_dir, 'sine_wave_900hz_16bit.wav')
-        #self.recorded_audio = 'test_loopback_sine_900hz_16bit_01.wav'
-        #self.path_recorded_audio = '/tmp/test_loopback_sine_900hz_16bit_01.wav'
-        #cmd = 'arecord -D iec958:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 /tmp/test_loopback_sine_900hz_16bit_01.wav | aplay -t wav  /tmp/sine_wave_900hz_16bit.wav'
-
-
-        #self.original_audio = os.path.join(self.tc.runtime_files_dir, 'kc_stronger_16bit.wav')
         self.original_audio = 'kc_stronger_16bit.wav'
         self.recorded_audio = 'test_loopback_kc_stronger_16bit.wav'
         self.path_original_audio = os.path.join(self.tc.runtime_files_dir, self.original_audio)
         self.path_recorded_audio = ('/tmp/%s' % self.recorded_audio)
-        status, output = self.tc.target.run(self.detect_audio_device())
-        msg = ('Audio device not exist. %s' % output)
-        self.assertEqual(status, 0, msg=msg)
+        #status, output = self.tc.target.run(self.detect_audio_device())
+        #msg = ('Audio device not exist. %s' % output)
+        #self.assertEqual(status, 0, msg=msg)
         # check audio device that connected to host machine. In this case, audio device was connected to DUT.
-        self.device = self.tc.target.run(self.detect_audio_device())
-        cmd = ('arecord -D `cat %s`:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.device, self.path_recorded_audio, self.original_audio))
+        cmd_device = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print tolower($1) }' > /tmp/audio_device"
+        self.device = self.tc.target.run(cmd_device)
+
+        cmd = ('arecord -D `cat /tmp/audio_device`:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.path_recorded_audio, self.original_audio))
 
         status, output = self.tc.target.run(cmd)
         msg = ('Unable to record audio. %s' % output)
