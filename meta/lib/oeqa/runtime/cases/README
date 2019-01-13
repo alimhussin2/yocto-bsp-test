@@ -1,0 +1,25 @@
+Hardware setup instructions
+===========================
+These are requirements execute test cases audio.py, usb.py, microsd.py.
+1. usb thumb drive
+2. microsd card
+3. audio capture card (EZCap)
+
+How to connect audio capture card?
+=================================
+Connection of audio capture card is loop back from target device (DUT) to itself
+
+ +-------+
+ |       |      +------+
+ |  Host |      |      | 3.5mm toRCA cable +---------------+
+ |       |      |  DUT |-------===========>| audio capture |
+ |       |      |      |     USB cable     |      card     |
+ |       |      |      |<------------------|               |
+ +-------+      +------+                   +---------------+
+     |              |
+     |              |
+     +---{network}--+
+
+How to connect USB thumb drive and microsd card?
+==============================================
+Both USB thumb drive and microsd card were attach to DUT
