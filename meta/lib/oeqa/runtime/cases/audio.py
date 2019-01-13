@@ -5,11 +5,6 @@ from oeqa.runtime.case import OERuntimeTestCase
 from oeqa.core.decorator.oeid import OETestID
 
 class AudioTest(OERuntimeTestCase):
-    def detect_audio_device(self):
-        cmd = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print tolower($1) }' | tee /tmp/audio_device"
-        self.device = subprocess.check_output('%s' % cmd, shell=True).decode()
-        return self.device
-
     def generate_fingerprint(self, audio_file):
         output = []
         cmd = subprocess.check_output(['/usr/bin/fpcalc', '-raw', audio_file]).decode()
@@ -76,44 +71,39 @@ class AudioTest(OERuntimeTestCase):
 
     @classmethod
     def setUpClass(cls):
-        original_audio = 'kc_stronger_16bit.wav'
+        original_audio = 'sample_audio_16bit.wav'
         src = os.path.join(cls.tc.runtime_files_dir, original_audio)
         dest = '/tmp/%s' % original_audio
         cls.tc.target.copyTo(src, dest)
 
     def test_audio_over_jack(self):
         passing_rate = 80.0
-        self.original_audio = 'kc_stronger_16bit.wav'
-        self.recorded_audio = 'test_loopback_kc_stronger_16bit.wav'
+        self.original_audio = 'sample_audio_16bit.wav'
+        self.recorded_audio = 'test_loopback_sample_audio_16bit.wav'
         self.path_original_audio = os.path.join(self.tc.runtime_files_dir, self.original_audio)
-        self.path_recorded_audio = ('/tmp/%s' % self.recorded_audio)
-        #status, output = self.tc.target.run(self.detect_audio_device())
-        #msg = ('Audio device not exist. %s' % output)
-        #self.assertEqual(status, 0, msg=msg)
+        self.path_target_recorded_audio = ('/tmp/%s' % self.recorded_audio)
         # check audio device that connected to host machine. In this case, audio device was connected to DUT.
         cmd_device = "arecord -L | grep -i 'digital audio' | awk -F ' ' '{ print tolower($1) }' > /tmp/audio_device"
         self.device = self.tc.target.run(cmd_device)
 
-        cmd = ('arecord -D `cat /tmp/audio_device`:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.path_recorded_audio, self.original_audio))
+        cmd = ('arecord -D `cat /tmp/audio_device`:CARD=CODEC,DEV=0 -f S16_LE -d 8 -r 44100 %s | aplay -t wav  /tmp/%s' % (self.path_target_recorded_audio, self.original_audio))
 
         status, output = self.tc.target.run(cmd)
         msg = ('Unable to record audio. %s' % output)
         self.assertEqual(status, 0, msg=msg)
         
         workdir = self.tc.runtime_files_dir
-        #self.path_audio = workdir + '/' + 'audio'
         self.path_audio = os.path.join(workdir, 'audio')
         if os.path.exists(self.path_audio):
             rmtree(self.path_audio)
         os.makedirs(self.path_audio)
 
         # copy from DUT:/tmp/test_loopback_*.wav to ../runtime/files/audio/
-        self.target.copyFrom(self.path_recorded_audio, self.path_audio)
+        self.target.copyFrom(self.path_target_recorded_audio, self.path_audio)
 
-        self.path_recorded_audio = os.path.join(self.path_audio, self.recorded_audio)
+        self.path_host_recorded_audio = os.path.join(self.path_audio, self.recorded_audio)
         # need a fpcalc install on host machine
-        result = self.check_similarity(self.path_original_audio, self.path_recorded_audio)
-        #result = self.check_similarity(os.path.join(workdir, 'recorded_noise.wav'), self.path_recorded_audio)
+        result = self.check_similarity(self.path_original_audio, self.path_host_recorded_audio)
         msg = 'Similarity index is %s' % result
         self.assertGreaterEqual(result, passing_rate, msg=msg)
 
