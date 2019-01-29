@@ -1,4 +1,4 @@
-# This is test that now working on Minnowboard-turbot
+# This is test that not working on Minnowboard-turbot
 # fork12 from crashme cause the kernel hang.
 fork12 fork12
 
