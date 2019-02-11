@@ -15,7 +15,7 @@ do
        echo 'Idle process has been terminated...'
        break
    else
-       sleep 1
+       sleep 10
        timer=$(( $timer + 1 ))
        echo "waiting...$timer seconds"
    fi
