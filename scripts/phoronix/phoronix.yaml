@@ -26,7 +26,8 @@ run:
         - chmod 755 -R scripts
         - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
-        - lava-test-case  "run_phoronix" --shell "python3 scripts/phoronix/phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR} --run-tests ${TESTSUITES}"
+        - cd scripts/phoronix
+        - lava-test-case  "run_phoronix" --shell "python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR} --run-tests ${TESTSUITES}"
 
         
 parse:

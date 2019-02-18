@@ -17,7 +17,7 @@ def check_pkg():
 
 def run_tests(tests_file):
     testsuites = ""
-    if os.path.isfile(tests_file):
+    if os.path.abspath(tests_file):
         with open(tests_file, 'r') as list_tests:
             for test in list_tests:
                 testsuites += test.replace('\n', ' ')
@@ -29,7 +29,7 @@ def run_tests(tests_file):
 def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, results_dir):
     # configure proxy, installation path and results storage
     phoronix_config = "phoronix-test-suite.xml"
-    tree = ET.parse('template/phoronix-test-suite.xml')
+    tree = ET.parse(os.path.abspath('template/phoronix-test-suite.xml'))
     root = tree.getroot()
     for item in root.iter('Networking'):
         item.find('ProxyAddress').text = proxy_address
