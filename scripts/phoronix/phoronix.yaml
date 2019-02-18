@@ -1,0 +1,38 @@
+metadata:
+    name: phoronix-test-suite
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Phoronix Benchmark test"
+    version: 0.1
+    maintainer: 
+        - alimhussin2@gmail.com
+    os:
+        - oe
+    devices:
+        - minnowboard
+    scope:
+        - functional
+    environment:
+        - lava-test-shell
+params:
+        PROXY_SERVER : ""
+        PROXY_PORT : ""
+        INSTALLED_TESTS_DIR : ""
+        DL_CACHE_DIR : ""
+        RESULTS_DIR : ""
+        TESTSUITES : ""
+run:
+    steps:
+        - ls -l
+        - chmod 755 -R scripts
+        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
+        - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
+        - lava-test-case  "run_phoronix" --shell "python3 scripts/phoronix/phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR} --run-tests ${TESTSUITES}"
+
+        
+parse:
+    pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
+    fixupdict:
+        ERROR: fail
+        FAIL: fail
+        PASS: pass
+
