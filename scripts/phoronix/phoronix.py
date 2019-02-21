@@ -91,10 +91,10 @@ if __name__ == "__main__":
                   "proxy-address or proxy-port are not set.")
             exit()
         else:
-            print("Info: Configure phoronix with these variable")
+            print("Info: Configuring phoronix")
             #print("Info: proxy address %s, proxy port %s, installed_tests %s, cache_dir %s, results_dir %s"
             #        % (proxy_address, proxy_port, installed_tests, cache_dir, results_dir))
-            #configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
+            configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
     if compare_results:
