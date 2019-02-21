@@ -39,7 +39,7 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
         item.find('CacheDirectory').text = cache_dir
     for item in root.iter('Testing'):
         item.find('ResultsDirectory').text = results_dir
-    print("save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
+    print("Info: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
 
 def compare_results(current_results, results_dir):
@@ -83,8 +83,8 @@ if __name__ == "__main__":
     # check phoronix configuration file
     if not os.path.isfile(os.path.join("/etc","phoronix-test-suite.xml")):
         print("Warning: Phoronix configuration file is not exist!\n"
-              "Create a new configuration by passing arguments"
-              "installed-test, cache-directory, proxy-address,"
+              "Create a new configuration by passing arguments \n"
+              "installed-test, cache-directory, proxy-address, \n"
               "proxy-port, results-directory")
         if all(var is None for var in [results_dir, installed_tests, cache_dir, proxy_address, proxy_port]):
             print("Error: some arguments e.g. results-storage, installed-tests, cache-directory, \n"
@@ -92,9 +92,9 @@ if __name__ == "__main__":
             exit()
         else:
             print("Info: Configure phoronix with these variable")
-            print("Info: proxy address %s, proxy port %s, installed_tests %s, cache_dir %s, results_dir %s"
-                    % (proxy_address, proxy_port, installed_tests, cache_dir, results_dir))
-            configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
+            #print("Info: proxy address %s, proxy port %s, installed_tests %s, cache_dir %s, results_dir %s"
+            #        % (proxy_address, proxy_port, installed_tests, cache_dir, results_dir))
+            #configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
     if compare_results:
