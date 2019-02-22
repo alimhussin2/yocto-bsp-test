@@ -1,3 +1,4 @@
 x264
 x265
-x265-opencl
+x264-opencl
+glmark2
