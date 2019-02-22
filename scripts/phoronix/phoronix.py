@@ -22,7 +22,8 @@ def run_tests(tests_file):
             for test in list_tests:
                 testsuites += test.replace('\n', ' ')
         print("Info: The following test suites will executed: %s" % testsuites)
-        subprocess.Popen(['export DISPLAY=:0; phoronix-test-suite batch-benchmark %s' % testsuites], shell=True)
+        cmd = 'export DISPLAY=:0; phoronix-test-suite batch-benchmark %s' % testsuites
+        subprocess.run(cmd, shell=True)
     else:
         print("Error: Test cases is not defined. Please create a file testcases.txt with contain a list of testcases.")
 
