@@ -26,14 +26,17 @@ def get_network_info():
     iface = netifaces.interfaces()
     nets = {}
     net_info = {}
-    for inet in iface:
-        net_face = ''.join([i for i in inet if not i.isdigit()])
-        if net_face == 'eno' or net_face == 'eth':
-            addr = netifaces.ifaddresses(inet)
-            net_info = addr[netifaces.AF_INET]
-            net_hw = addr[netifaces.AF_LINK]
-            net_info = {"interface": inet, "ipaddr": net_info[0]['addr'], "netmask": net_info[0]['netmask'], "broadcast": net_info[0]['broadcast'], "macaddr": net_hw[0]['addr']}
-            nets.update(net_info)
+    try:
+        for inet in iface:
+            net_face = ''.join([i for i in inet if not i.isdigit()])
+            if net_face == 'eno' or net_face == 'eth':
+                addr = netifaces.ifaddresses(inet)
+                net_info = addr[netifaces.AF_INET]
+                net_hw = addr[netifaces.AF_LINK]
+                net_info = {"interface": inet, "ipaddr": net_info[0]['addr'], "netmask": net_info[0]['netmask'], "broadcast": net_info[0]['broadcast'], "macaddr": net_hw[0]['addr']}
+                nets.update(net_info)
+    except Exception as e:
+        print("type error: " + str(e))
     return nets
 
 def get_kernel_version():
