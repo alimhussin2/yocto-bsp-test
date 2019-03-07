@@ -20,7 +20,7 @@ run:
         - chmod 755 -R scripts
         - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
-        - cd scripts/phoronix
+        - cd scripts/glmark2
         - python3 run_glmark2.py
 
         
