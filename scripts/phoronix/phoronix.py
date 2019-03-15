@@ -6,6 +6,8 @@
 import os
 import subprocess
 import argparse
+import datetime
+import re
 from shutil import copyfile
 import xml.etree.ElementTree as ET
 
@@ -42,6 +44,21 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
         item.find('ResultsDirectory').text = results_dir
     print("Info: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
+
+def convert_json():
+    cmd = 'phoronix-test-suite show-result'
+    output = subprocess.check_output(cmd, shell=True)
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
+    results = re.findall(re.escape(date) + r'.*[0-9]', output.decode())
+    for r in range(len(results)):
+        cmd = 'phoronix-test-suite result-file-to-json %s' % results[r]
+        results_json =  results[r] + ".json"
+        with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as p, open(results_json, "w+") as f:
+            for line in p.stdout:
+                f.write(line.decode())
+                f.flush()
+            f.close()
+        print("INFO: Saved result in %s" % results_json)
 
 def compare_results(current_results, results_dir):
     if os.path.exists(results_dir):
@@ -98,6 +115,7 @@ if __name__ == "__main__":
             configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
+        convert_json()
     if compare_results:
         results1 = args.compare_results[0]
         results2 = args.compare_results[1]
