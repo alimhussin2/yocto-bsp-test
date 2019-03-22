@@ -50,6 +50,14 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
     print("Info: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
 
+def get_resultsdir():
+    tree = ET.parse('/etc/phoronix-test-suite.xml')
+    root = tree.getroot()
+    resultsdir = ''
+    for n in root.iter('Testing'):
+        resultsdir = n.find('ResultsDirectory').text
+    return resultsdir
+
 def convert_json():
     cmd = 'phoronix-test-suite show-result'
     output = subprocess.check_output(cmd, shell=True)
@@ -72,10 +80,12 @@ def compare_results(current_results, results_dir):
         print("Error: Unable to compare results as % is not exists." % results_dir)
 
 def publish_results(results, upload_server):
-    cmd = ("curl -F 'path=@%s' %s" % (results, upload_server))
+    upload_server = os.path.join(upload_server, get_boardinfo())
+    cmd = "cp -r %s %s" % (results, upload_server)
+    if not os.path.exists(upload_server):
+        os.mkdir(upload_server)
     output = subprocess.check_output(cmd, shell=True).decode()
-    if output.returncode == 0:
-        print("Successfully upload to %s" % output)
+    print("Successfully upload to %s" % upload_server)
 
 def register_arguments():
     parser = argparse.ArgumentParser()
@@ -132,5 +142,5 @@ if __name__ == "__main__":
             compare_results(results1, results2)
     if upload_server:
         print("The test results will upload to server %s" % upload_server)
-        #publish_results(results_dir, upload_server)
+        publish_results(get_resultsdir(), upload_server)
 
