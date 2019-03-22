@@ -17,6 +17,11 @@ def check_pkg():
         print("Error: phoronix-test-suite not install")
         exit()
 
+def get_boardinfo():
+    with open('/sys/class/dmi/id/board_name', 'r') as f:
+        board_name = f.read().replace('\n', '').replace(' ', '_')
+    return board_name
+
 def run_tests(tests_file):
     testsuites = ""
     if os.path.abspath(tests_file):
@@ -41,7 +46,7 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
         item.find('EnvironmentDirectory').text = installed_dir
         item.find('CacheDirectory').text = cache_dir
     for item in root.iter('Testing'):
-        item.find('ResultsDirectory').text = results_dir
+        item.find('ResultsDirectory').text = os.path.join(results_dir, get_boardinfo())
     print("Info: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
 
