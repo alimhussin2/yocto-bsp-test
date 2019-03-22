@@ -20,6 +20,7 @@ params:
         DL_CACHE_DIR : ""
         RESULTS_DIR : ""
         TESTSUITES : ""
+        UPLOAD_DIR : ""
 run:
     steps:
         - ls -l
@@ -29,6 +30,7 @@ run:
         - cd scripts/phoronix
         - python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR}
         - python3 phoronix.py --run-tests ${TESTSUITES}
+        - python3 phoronix.py --upload-results ${UPLOAD_DIR}
 
         
 parse:
