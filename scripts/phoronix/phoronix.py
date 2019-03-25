@@ -22,6 +22,15 @@ def get_boardinfo():
         board_name = f.read().replace('\n', '').replace(' ', '_')
     return board_name
 
+def get_os():
+    os_name = []
+    with open('/etc/os-release') as f:
+        os = re.findall(r'ID=.*', f.read())
+    for i in os:
+        os_name.append(re.sub('[^a-zA-Z0-9.\-]+', '', i).replace('ID',''))
+    return os_name[0] + '-' + os_name[1]
+    
+
 def run_tests(tests_file):
     testsuites = ""
     if os.path.abspath(tests_file):
@@ -80,7 +89,9 @@ def compare_results(current_results, results_dir):
         print("Error: Unable to compare results as % is not exists." % results_dir)
 
 def publish_results(results, upload_server):
-    upload_server = os.path.join(upload_server, get_boardinfo())
+    os_name = get_os()
+    suffix_path = get_boardinfo() + '/' + os_name
+    upload_server = os.path.join(upload_server, suffix_path)
     cmd = "cp -r %s %s" % (results, upload_server)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
