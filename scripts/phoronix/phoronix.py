@@ -8,6 +8,7 @@ import subprocess
 import argparse
 import datetime
 import re
+import fnmatch
 from shutil import copyfile
 import xml.etree.ElementTree as ET
 
@@ -63,9 +64,16 @@ def get_resultsdir():
     tree = ET.parse('/etc/phoronix-test-suite.xml')
     root = tree.getroot()
     resultsdir = ''
+    lresultsdir = []
     for n in root.iter('Testing'):
         resultsdir = n.find('ResultsDirectory').text
-    return resultsdir
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
+    lfiles = os.listdir(resultsdir)
+    for f in lfiles:
+        if fnmatch.fnmatch(f, date + '*'):
+            lresultsdir.append(os.path.join(resultsdir, f))
+    return lresultsdir
+
 
 def convert_json():
     cmd = 'phoronix-test-suite show-result'
@@ -92,10 +100,12 @@ def publish_results(results, upload_server):
     os_name = get_os()
     suffix_path = get_boardinfo() + '/' + os_name
     upload_server = os.path.join(upload_server, suffix_path)
-    cmd = "cp -r %s %s" % (results, upload_server)
+    #cmd = "cp -r %s %s" % (results, upload_server)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
-    output = subprocess.check_output(cmd, shell=True).decode()
+    for r in results:
+        cmd = "cp -r %s %s" % (r, upload_server)
+        output = subprocess.check_output(cmd, shell=True).decode()
     print("Successfully upload to %s" % upload_server)
 
 def register_arguments():
