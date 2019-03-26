@@ -9,6 +9,7 @@ import argparse
 import datetime
 import re
 import fnmatch
+import ntpath
 from shutil import copyfile
 import xml.etree.ElementTree as ET
 
@@ -74,6 +75,9 @@ def get_resultsdir():
             lresultsdir.append(os.path.join(resultsdir, f))
     return lresultsdir
 
+def get_resultsfiles(resultsdir):                                                                                                                         
+    head, lresultsdir = ntpath.split(resultsdir)     
+    return lresultsdir
 
 def convert_json():
     cmd = 'phoronix-test-suite show-result'
@@ -100,13 +104,12 @@ def publish_results(results, upload_server):
     os_name = get_os()
     suffix_path = get_boardinfo() + '/' + os_name
     upload_server = os.path.join(upload_server, suffix_path)
-    #cmd = "cp -r %s %s" % (results, upload_server)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
     for r in results:
         cmd = "cp -r %s %s" % (r, upload_server)
         output = subprocess.check_output(cmd, shell=True).decode()
-    print("Successfully upload to %s" % upload_server)
+        print("Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
 
 def register_arguments():
     parser = argparse.ArgumentParser()
