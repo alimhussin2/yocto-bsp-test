@@ -1,0 +1,15 @@
+botan
+build-gcc
+c-ray
+pts/gnupg
+openssl
+glibc-bench
+ramspeed
+stream
+tinymembench
+mbw
+x264
+x265
+x264-opencl
+glmark2
+
