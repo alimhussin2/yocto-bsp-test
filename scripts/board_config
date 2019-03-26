@@ -74,14 +74,14 @@ else
     echo "[  ERROR  ] Unable to mount to nfs server"
 fi
 
-list_media=`ls /run/media`
-if [[ ! -z ${list_media} ]];
-then
-    for media in ${list_media}
-    do 
-        echo "[  INFO  ] umount /run/media/${media}"
-        umount /run/media/${media}
-    done
-else
-    echo "[  INFO  ] No media attach to device"
-fi
+#list_media=`ls /run/media`
+#if [[ ! -z ${list_media} ]];
+#then
+#    for media in ${list_media}
+#    do 
+#        echo "[  INFO  ] umount /run/media/${media}"
+#        umount /run/media/${media}
+#    done
+#else
+#    echo "[  INFO  ] No media attach to device"
+#fi
