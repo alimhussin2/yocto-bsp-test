@@ -1,3 +1,8 @@
+Software requirement
+====================
+install fpcalc on host machine
+$ sudo apt-get install fpcalc
+
 Hardware setup instructions
 ===========================
 These are requirements execute test cases audio.py, usb.py, microsd.py.
