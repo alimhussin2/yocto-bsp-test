@@ -13,15 +13,17 @@ import re
 import os
 from shutil import copyfile
 
-try:
-    import netifaces
-except ImportError:
-    print("Module netifaces not install in the system. To install use pip3 install netifaces")
-    exit()
+#try:
+#    import netifaces
+#except ImportError:
+#    print("Module netifaces not install in the system. To install use pip3 install netifaces")
+#    exit()
 
+# function deprecated
 def get_interfaces():
     return netifaces.interfaces()
 
+# function deprecated
 def get_network_info():
     iface = netifaces.interfaces()
     nets = {}
@@ -38,6 +40,28 @@ def get_network_info():
     except Exception as e:
         print("type error: " + str(e))
     return nets
+
+def get_ipaddr(iface):
+    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s |grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; echo $_RAW_STREAM_V4 | awk '{print$1}'" % iface
+    return subprocess.check_output(cmd, shell=True).decode().strip('\n')
+
+def get_broadcast(iface):
+    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s |grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; echo $_RAW_STREAM_V4 | awk '{print$3}'" % iface
+    return subprocess.check_output(cmd, shell=True).decode().strip('\n')
+
+def get_macaddr(iface):
+    cmd = "/sbin/ifconfig %s |grep HWaddr" % iface
+    output = subprocess.check_output(cmd, shell=True).decode().strip('\n').split()
+    macaddr = output[len(output)-1]
+    return macaddr
+
+def show_netinfo():
+    cmd = "IFACES=`/sbin/ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]'`; echo $IFACES | awk  '{ print $1 }'"
+    iface = subprocess.check_output(cmd, shell=True).decode().strip('\n')
+    print(iface)
+    net_info = {}
+    net_info = {"interface": iface, "ipaddr": get_ipaddr(iface), "broadcast": get_broadcast(iface), "macaddr": get_macaddr(iface)}
+    return net_info
 
 def get_kernel_version():
     return subprocess.check_output(['uname', '-r']).decode().strip('\n')
@@ -77,7 +101,7 @@ def get_user():
     return subprocess.check_output(['whoami']).decode().strip('\n')
 
 def main():
-    data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": get_network_info()}
+    data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": show_netinfo()}
     path = '/home/root'
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
