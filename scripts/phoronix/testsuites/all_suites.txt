@@ -12,4 +12,7 @@ x264
 x265
 x264-opencl
 glmark2
-
+compress-gzip
+compress-7zip
+encode-mp3
+system-decompress-xz
