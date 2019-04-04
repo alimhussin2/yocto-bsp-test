@@ -50,7 +50,7 @@ else
     echo "[  INFO  ] Directory /srv/data exists"
 fi
 echo "[  INFO  ] Mount to nfs server"
-mount nfsserver:/srv/data /srv/data
+mount -o rw,hard,intr nfsserver:/srv/data /srv/data
 
 echo "[  INFO  ] Set hostname"
 sed -i "s/localhost.localdomain/`hostname`/g" /etc/hosts
