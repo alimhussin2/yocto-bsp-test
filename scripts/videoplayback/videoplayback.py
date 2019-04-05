@@ -53,6 +53,24 @@ class VideoPlayback():
             f.write('Return code : %s\n' % ret)
             f.close()
 
+class sanityTestGstreamer(VideoPlayback):
+    def test_displayAutoVideoSink(self):
+        cmd = 'gst-launch-1.0 -v videotestsrc ! videoconvert ! autovideosink'
+        self.runCmd(cmd)
+
+    def test_displayXvimageSink(self):
+        cmd = 'gst-launch-1.0 -v videotestsrc ! videoconvert ! xvimagesink'
+        self.runCmd(cmd)
+
+    def test_displayXimageSink(self):
+        cmd = 'gst-launch-1.0 -v videotestsrc ! videoconvert ! ximagesink'
+        self.runCmd(cmd)
+
+
+    def test_displayGLimageSink(self):
+        cmd = 'gst-launch-1.0 -v videotestsrc ! videoconvert ! glimagesink'
+        self.runCmd(cmd)
+
 class FpsH264VideoPlayback(VideoPlayback):                                                                                                                                                                
     def __init__(self, driver):                               
         self.driver = driver                                                                                                                                                                              
@@ -124,6 +142,55 @@ class FpsVP9VideoPlayback(VideoPlayback):
     def test_VP9_2160p30_VideoPlayback(self, videofile):
         self.run(videofile)
 
+class VideoEncoding(VideoPlayback):
+    def __init__(self, driver):
+        self.driver = driver
+
+    def run(self, codec, container):
+        if self.driver == "vaapi":
+            cmd = 'gst-launch-1.0 -v videotestsrc ! %s ! filesink location=test_%s.%s' % (codec, codec, container)
+        elif self.driver == "msdk":
+            cmd = 'LIBVA_DRIVER_NAME=iHD gst-launch-1.0 -v videotestsrc ! %s ! filesink location=test_%s.%s' % (codec, codec, container)
+        self.runCmd(cmd)
+
+class MsdkEncoding(VideoEncoding):
+    def test_MsdkH264Encoder(self):
+        self.run('msdkh264enc', 'mp4')
+
+    def test_MsdkH265Encoder_8bits(self):
+        self.run('msdkh265enc', 'mp4')
+
+    def test_MsdkH265Encoder_10bits(self):
+        pass
+
+    def test_MsdkJpegEncoder(self):
+        pass
+
+    def test_MsdkMpeg2Encoder(self):
+        pass
+
+    def test_MsdkVP8Encoder(self):
+        pass
+
+class VaapiEncoding(VideoEncoding):
+    def test_vaapiH264Encoder(self):
+        self.run('vaapih264enc', 'mp4')
+
+def test_encoderDriver(hwAccelerator):
+    drivers = VideoPlayback.getDriverPlugins(hwAccelerator)
+    h264enc = hwAccelerator + 'h264enc'
+    vaapienc = VaapiEncoding('vaapi')
+    msdkenc = MsdkEncoding('msdk')
+
+    if re.search(h264enc, drivers) is not None:
+        print('%s is supported' % h264enc)
+        if hwAccelerator == 'vaapi':
+            vaapienc.test_vaapiH264Encoder()
+        elif hwAccelerator == 'msdk':
+            msdkenc.test_MsdkH264Encoder()
+    else:
+        print('%s is not supported' % h264enc)
+
 def test_decoderDriver(hwAccelerator):
     drivers = VideoPlayback.getDriverPlugins(hwAccelerator)
     print("Testing %s driver" % hwAccelerator)
@@ -132,40 +199,48 @@ def test_decoderDriver(hwAccelerator):
     vp8dec = hwAccelerator + 'vp8dec'
     vp9dec = hwAccelerator + 'vp9dec'
     vp10dec = hwAccelerator + 'vp10dec'
+    sampleVideoDir = "/run/media/sda1/phoronix-cache/download-cache/sample_video"
 
     if re.search(h264dec, drivers) is not None:
         print('%s is supported' % h264dec)
         vh264 = FpsH264VideoPlayback(hwAccelerator)
-        vh264.test_H264_1080p60_8bitsVideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_1080p_59.94fps_H264_25000kbps_8bits_noHDR_v1511090000.mp4")
-        vh264.test_H264_2160p60_10bitsVideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_2160p_59.94fps_H264_35000kbps_8bits_noHDR_v1511090000.mp4")
+        vh264.test_H264_1080p60_8bitsVideoPlayback(os.path.join(sampleVideoDir, "ToS_1080p_59.94fps_H264_25000kbps_8bits_noHDR_v1511090000.mp4"))
+        vh264.test_H264_2160p60_10bitsVideoPlayback(os.path.join(sampleVideoDir,"ToS_2160p_59.94fps_H264_35000kbps_8bits_noHDR_v1511090000.mp4"))
     else:
-        print('%s is not supported' % h264)
+        print('%s is not supported' % h264dec)
 
     if re.search(h265dec, drivers) is not None:
         print('%s is supported' % h265dec)
         vh265 = FpsH265VideoPlayback(hwAccelerator)
-        vh265.test_H265_1080p60_8bitsVideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_1080p_59.94fps_H265_12000kbps_8bits_noHDR_v1511090000.mp4")
-        vh265.test_H265_1080p60_10bitsVideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_1080p_59.94fps_H265_12000kbps_10bits_noHDR_v1511090000.mp4")
-        vh265.test_H265_2160p60_10bitsVideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_2160p_59.94fps_H265_35000kbps_10bits_noHDR_v1511090000.mp4")
+        vh265.test_H265_1080p60_8bitsVideoPlayback(os.path.join(sampleVideoDir,"ToS_1080p_59.94fps_H265_12000kbps_8bits_noHDR_v1511090000.mp4"))
+        vh265.test_H265_1080p60_10bitsVideoPlayback(os.path.join(sampleVideoDir, "ToS_1080p_59.94fps_H265_12000kbps_10bits_noHDR_v1511090000.mp4"))
+        vh265.test_H265_2160p60_10bitsVideoPlayback(os.path.join(sampleVideoDir, "ToS_2160p_59.94fps_H265_35000kbps_10bits_noHDR_v1511090000.mp4"))
     else:                                                                                                                                                                                
         print('%s is not supported' % h265dec)
 
     if re.search(vp8dec, drivers) is not None:
         print('%s is supported' % vp8dec)
         vp8 = FpsVP8VideoPlayback(hwAccelerator)
-        vp8.test_VP8_1080p24_VideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_1080p_24fps_VP8.webm")
+        vp8.test_VP8_1080p24_VideoPlayback(os.path.join(sampleVideoDir, "ToS_1080p_24fps_VP8.webm"))
     else:
         print('%s is not supported' % vp8dec)
 
     if re.search(vp9dec, drivers) is not None:                                                                                                                                  
         print('%s is supported' % vp9dec)                                                                                                                                               
         vp9 = FpsVP9VideoPlayback(hwAccelerator)                                                                                                                                
-        vp9.test_VP9_1080p30_VideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_1080p_29.97fps_VP9_8000kbps_8bits_noHDR_v2014.webm")
-        vp9.test_VP9_2160p30_VideoPlayback("/run/media/sda1/phoronix-cache/download-cache/sample_video/ToS_2160p_29.97fps_VP9_35000kbps_8bits_noHDR_v2014.webm")
+        vp9.test_VP9_1080p30_VideoPlayback(os.path.join(sampleVideoDir, "ToS_1080p_29.97fps_VP9_8000kbps_8bits_noHDR_v2014.webm"))
+        vp9.test_VP9_2160p30_VideoPlayback(os.path.join(sampleVideoDir, "ToS_2160p_29.97fps_VP9_35000kbps_8bits_noHDR_v2014.webm"))
     else:                                                                                                                                                                       
         print('%s not supported' % vp9dec)
 
 if __name__ == "__main__":
+    sanity = sanityTestGstreamer()
+    sanity.test_displayAutoVideoSink()
+    sanity.test_displayXvimageSink()
+    sanity.test_displayXimageSink()
+    sanity.test_displayGLimageSink()
     test_decoderDriver('vaapi')
     test_decoderDriver('msdk')
+    test_encoderDriver('vaapi')
+    test_encoderDriver('msdk')
 
