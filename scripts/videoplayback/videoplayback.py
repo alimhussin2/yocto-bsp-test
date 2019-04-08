@@ -164,32 +164,88 @@ class MsdkEncoding(VideoEncoding):
         pass
 
     def test_MsdkJpegEncoder(self):
-        pass
+        self.run('msdkmjpegenc', 'mjpg')
 
     def test_MsdkMpeg2Encoder(self):
-        pass
+        self.run('msdkmpeg2enc', 'mpeg')
 
     def test_MsdkVP8Encoder(self):
-        pass
+        self.run('msdkvp8enc', 'webm')
 
 class VaapiEncoding(VideoEncoding):
-    def test_vaapiH264Encoder(self):
+    def test_VaapiH264Encoder(self):
         self.run('vaapih264enc', 'mp4')
+
+    def test_VaapiH265Encoder_8bits(self):
+        pass
+
+    def test_VaapiH265Encoder_10bits(self):
+        pass
+
+    def test_VaapiJpegEncoder(self):
+        self.run('vaapijpegenc', 'mjpg')
+
+    def test_VaapiMpeg2Encoder(self):
+        self.run('vaapimpeg2enc', 'mpeg')
+
+    def test_VaapiVP8Encoder(self):
+        self.run('vaapivp8enc', 'webm')
 
 def test_encoderDriver(hwAccelerator):
     drivers = VideoPlayback.getDriverPlugins(hwAccelerator)
-    h264enc = hwAccelerator + 'h264enc'
     vaapienc = VaapiEncoding('vaapi')
     msdkenc = MsdkEncoding('msdk')
+    h264enc = hwAccelerator + 'h264enc'
+    h265enc = hwAccelerator + 'h265enc'
+    jpegenc = hwAccelerator + 'jpegenc'
+    mjpegenc = hwAccelerator + 'mjpegenc'
+    mpeg2enc = hwAccelerator + 'mpeg2enc'
+    vp8enc = hwAccelerator + 'vp8enc'
 
     if re.search(h264enc, drivers) is not None:
         print('%s is supported' % h264enc)
         if hwAccelerator == 'vaapi':
-            vaapienc.test_vaapiH264Encoder()
+            vaapienc.test_VaapiH264Encoder()
         elif hwAccelerator == 'msdk':
             msdkenc.test_MsdkH264Encoder()
     else:
         print('%s is not supported' % h264enc)
+
+    if re.search(jpegenc, drivers) is not None:
+        print('%s is supported' % jpegenc)
+        if hwAccelerator == 'vaapi':
+            vaapienc.test_VaapiJpegEncoder()
+        elif hwAccelerator == 'msdk':
+            msdkenc.test_MsdkJpegEncoder()
+    else:
+        print('%s is not supported' % jpegenc)
+
+    if re.search(mjpegenc, drivers) is not None:
+        print('%s is supported' % mjpegenc)
+        if hwAccelerator == 'vaapi':
+            vaapienc.test_VaapiJpegEncoder()
+        elif hwAccelerator == 'msdk':
+            msdkenc.test_MsdkJpegEncoder()
+    else:
+        print('%s is not supported' % mjpegenc)
+
+    if re.search(mpeg2enc, drivers) is not None:
+        print('%s is supported' % mpeg2enc)
+        if hwAccelerator == 'vaapi':
+            vaapienc.test_VaapiMpeg2Encoder()
+        elif hwAccelerator == 'msdk':
+            msdkenc.test_MsdkMpeg2Encoder()
+    else:
+        print('%s is not supported' % mpeg2enc)
+
+    if re.search(vp8enc, drivers) is not None:
+        print('%s is supported' % vp8enc)
+        if hwAccelerator == 'vaapi':
+            vaapienc.test_VaapiVP8Encoder()
+        elif hwAccelerator == 'mask':
+            msdkenc.test_MsdkVP8Encoder()
+    else:
+        print('%s is not supported' % vp8enc)
 
 def test_decoderDriver(hwAccelerator):
     drivers = VideoPlayback.getDriverPlugins(hwAccelerator)
