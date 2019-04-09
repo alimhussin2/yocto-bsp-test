@@ -71,7 +71,7 @@ def get_resultsdir():
     lresultsdir = []
     for n in root.iter('Testing'):
         resultsdir = n.find('ResultsDirectory').text
-    date = datetime.datetime.now().strftime("%Y-%m-%d")
+    date = datetime.now().strftime("%Y-%m-%d")
     lfiles = os.listdir(resultsdir)
     for f in lfiles:
         if fnmatch.fnmatch(f, date + '*'):
@@ -116,13 +116,14 @@ def publish_results(results, upload_server):
 
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
-    upload_dir = os.path.join('lava', ww_dir)
-    lava_dir = get_lava_dir()[0]
-    phoronix_dir = 'phoronix-test-suite'
-    suffix_path = get_boardinfo() + '/' + get_os()
-    upload_dir = os.path.join(upload_dir, lava_dir)
-    upload_dir = os.path.join(upload_dir, phoronix_dir)
-    upload_dir = os.path.join(upload_dir, suffix_path)
+    upload_dir = os.path.join(ww_dir, 'lava')
+    lava_dirs = get_lava_dir()
+    for lava_dir in lava_dirs:
+        phoronix_dir = 'phoronix-test-suite'
+        suffix_path = get_boardinfo() + '/' + get_os()
+        upload_dir = os.path.join(upload_dir, lava_dir)
+        upload_dir = os.path.join(upload_dir, phoronix_dir)
+        upload_dir = os.path.join(upload_dir, suffix_path)
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     for result in results:
