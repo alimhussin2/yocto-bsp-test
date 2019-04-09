@@ -10,13 +10,16 @@ import datetime
 import re
 import fnmatch
 import ntpath
-from shutil import copyfile
 import xml.etree.ElementTree as ET
+import sys
+from os import environ
+sys.path.append('../utils/')
+from create_archives import *
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
     if output.returncode == 1:
-        print("Error: phoronix-test-suite not install")
+        print("ERROR: phoronix-test-suite not install")
         exit()
 
 def get_boardinfo():
@@ -39,11 +42,11 @@ def run_tests(tests_file):
         with open(tests_file, 'r') as list_tests:
             for test in list_tests:
                 testsuites += test.replace('\n', ' ')
-        print("Info: The following test suites will executed: %s" % testsuites)
+        print("INFO: The following test suites will executed: %s" % testsuites)
         cmd = 'export DISPLAY=:0; phoronix-test-suite batch-benchmark %s' % testsuites
         subprocess.run(cmd, shell=True)
     else:
-        print("Error: Test cases is not defined. Please create a file testcases.txt with contain a list of testcases.")
+        print("ERROR: Test cases is not defined. Please create a file testcases.txt with contain a list of testcases.")
 
 def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, results_dir):
     # configure proxy, installation path and results storage
@@ -58,7 +61,7 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
         item.find('CacheDirectory').text = cache_dir
     for item in root.iter('Testing'):
         item.find('ResultsDirectory').text = os.path.join(results_dir, get_boardinfo())
-    print("Info: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
+    print("INFO: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
 
 def get_resultsdir():
@@ -75,7 +78,7 @@ def get_resultsdir():
             lresultsdir.append(os.path.join(resultsdir, f))
     return lresultsdir
 
-def get_resultsfiles(resultsdir):                                                                                                                         
+def get_resultsfiles(resultsdir):
     head, lresultsdir = ntpath.split(resultsdir)     
     return lresultsdir
 
@@ -98,7 +101,7 @@ def compare_results(current_results, results_dir):
     if os.path.exists(results_dir):
         subprocess.call(['phoronix-test-suite merge-results %s %s'] % (current_results, results_dir), shell=True)
     else:
-        print("Error: Unable to compare results as % is not exists." % results_dir)
+        print("ERROR: Unable to compare results as % is not exists." % results_dir)
 
 def publish_results(results, upload_server):
     os_name = get_os()
@@ -109,7 +112,23 @@ def publish_results(results, upload_server):
     for r in results:
         cmd = "cp -r %s %s" % (r, upload_server)
         output = subprocess.check_output(cmd, shell=True).decode()
-        print("Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
+        print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
+
+def auto_publish_results(results):
+    ww_dir = create_archives_by_daily(None, True)
+    upload_dir = os.path.join('lava', ww_dir)
+    lava_dir = get_lava_dir()[0]
+    phoronix_dir = 'phoronix-test-suite'
+    suffix_path = get_boardinfo() + '/' + get_os()
+    upload_dir = os.path.join(upload_dir, lava_dir)
+    upload_dir = os.path.join(upload_dir, phoronix_dir)
+    upload_dir = os.path.join(upload_dir, suffix_path)
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    for result in results:
+        cmd = 'cp -r %s %s' % (result, upload_dir)
+        subprocess.check_output(cmd, shell=True).decode()
+        print('Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
 
 def register_arguments():
     parser = argparse.ArgumentParser()
@@ -137,24 +156,24 @@ if __name__ == "__main__":
     proxy_port = args.proxy_port
 
     check_pkg()
-    # check phoronix configuration file
+    check phoronix configuration file
     if not os.path.isfile(os.path.join("/etc","phoronix-test-suite.xml")):
         print("Warning: Phoronix configuration file is not exist!\n"
               "Create a new configuration by passing arguments \n"
               "installed-test, cache-directory, proxy-address, \n"
               "proxy-port, results-directory")
         if all(var is None for var in [results_dir, installed_tests, cache_dir, proxy_address, proxy_port]):
-            print("Error: some arguments e.g. results-storage, installed-tests, cache-directory, \n"
+            print("ERROR: some arguments e.g. results-storage, installed-tests, cache-directory, \n"
                   "proxy-address or proxy-port are not set.")
             exit()
         else:
-            print("Info: Configuring phoronix")
+            print("INFO: Configuring phoronix")
             #print("Info: proxy address %s, proxy port %s, installed_tests %s, cache_dir %s, results_dir %s"
             #        % (proxy_address, proxy_port, installed_tests, cache_dir, results_dir))
             configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
-        convert_json()
+        auto_publish_results(get_resultsdir())
     if compare_results:
         results1 = args.compare_results[0]
         results2 = args.compare_results[1]
