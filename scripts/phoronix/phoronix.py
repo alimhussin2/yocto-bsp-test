@@ -156,7 +156,7 @@ if __name__ == "__main__":
     proxy_port = args.proxy_port
 
     check_pkg()
-    check phoronix configuration file
+    #check phoronix configuration file
     if not os.path.isfile(os.path.join("/etc","phoronix-test-suite.xml")):
         print("Warning: Phoronix configuration file is not exist!\n"
               "Create a new configuration by passing arguments \n"
