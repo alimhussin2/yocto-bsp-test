@@ -2,9 +2,11 @@
 
 import os
 import re
+import json
 import subprocess
 
 class VideoPlayback():
+    
     def getDriverPlugins(driver):
         if driver == 'msdk' or driver == 'vaapi':
             cmd = 'gst-inspect-1.0 %s' % driver                                                                                                                                          
@@ -23,7 +25,7 @@ class VideoPlayback():
 
     def runCmd(self, cmd):
         ret = 0
-        with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1024) as p, open('debug_videoplayback.log', 'a+') as f:
+        with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1024) as p, open('debug_videoplayback.log', 'w+') as f:
             try:
                 stdout, stderr = p.communicate(timeout=5)
             except subprocess.TimeoutExpired:
@@ -36,7 +38,7 @@ class VideoPlayback():
         self.decision(ret, cmd)
 
     def decision(self, ret, cmd):
-        with open('results_videoplayback.log', 'a+') as f:
+        with open('results_videoplayback.json', 'a+') as f:
             if ret == 0:
                 status = "FAIL"
                 print('Test: %s : %s' % (cmd, status))
@@ -49,9 +51,19 @@ class VideoPlayback():
                 status = "FAIL"
                 print('Test: %s : %s' % (cmd, status))
                 print('Return code: %s' % ret)
-            f.write('Test: %s : %s\n' % (cmd, status))
-            f.write('Return code : %s\n' % ret)
+            #f.write('cmd: %s : %s\n' % (cmd, status))
+            #f.write('Return code : %s\n' % ret)
+            data = self.resultToJson(cmd, ret, status)
+            f.write(json.dumps(data, sort_keys=False, indent=4, separators=(',',': ')))
             f.close()
+
+    def resultToJson(self, cmd, ret, status):
+        rawData = ''
+        with open('debug_videoplayback.log', 'r') as f:
+            rawData = f.read().decode()
+            f.close()
+        data = { "test": {"cmd": cmd, "returnCode": ret, "status" : status, "log" : [rawData]}}
+        return data
 
 class sanityTestGstreamer(VideoPlayback):
     def test_displayAutoVideoSink(self):
