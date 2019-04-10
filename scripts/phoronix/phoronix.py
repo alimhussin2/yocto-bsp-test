@@ -13,6 +13,7 @@ import ntpath
 import xml.etree.ElementTree as ET
 import sys
 from os import environ
+from .ptsxml2json import convert_xmltojson
 sys.path.append('../utils/')
 from create_archives import *
 
@@ -141,6 +142,7 @@ def register_arguments():
     parser.add_argument("--cache-directory", help="path to store cache files")
     parser.add_argument("--proxy-address", help="Hostname of proxy server. e.g proxy.com")
     parser.add_argument("--proxy-port", help="port number of proxy server")
+    parser.add_argument("--convert-json", help="convert phoronix test results to json format")
     args = parser.parse_args()
     return args
 
@@ -155,6 +157,7 @@ if __name__ == "__main__":
     cache_dir = args.cache_directory
     proxy_address = args.proxy_address
     proxy_port = args.proxy_port
+    convert_json = args.convert_json
 
     check_pkg()
     #check phoronix configuration file
@@ -185,6 +188,15 @@ if __name__ == "__main__":
             print("Comparing results %s with %s" % (results1, results2))
             compare_results(results1, results2)
     if upload_server:
-        print("The test results will upload to server %s" % upload_server)
+        print("INFO: The test results will upload to server %s" % upload_server)
         publish_results(get_resultsdir(), upload_server)
+    if convert_json:
+        print("INFO: Convert phoronix test results to json format")
+        lresultdirs = get_resultsdir()
+        for resultdir in lresultdirs:
+            result = os.path.join(resultdir, 'composite.xml')
+            if os.path.isfile(result):
+                convert_xmltojson(result)
+            else:
+                print('ERROR: %s is not exist!' % result)
 

@@ -6,7 +6,6 @@ try:
     import simplejson as json
 except ImportError:
     print("ERROR: Module simplejson is not installed in the system.")
-    exit()
 
 dictData={}
 identifyTag="Identifier"
