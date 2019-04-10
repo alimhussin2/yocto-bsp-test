@@ -49,6 +49,10 @@ visibility: public
     definitions:
     - repository: https://github.com/alimhussin2/yocto-bsp-test.git
       from: git
+      parameters:
+              NFSSERVER: "mynfsserver.com"
+              NFSSRC: "/path/from/nfs/mount"
+              NFSDEST: "/path/to/nfs/mount"
       path: auto-bsp-test.yaml
       name: lyocto-bsp-test
     name: yocto-bsp-test
