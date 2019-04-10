@@ -4,7 +4,7 @@ This repo contain example of codes for automated board support packages (BSP) te
 ## example-lava-job
 These are some examples of LAVA jobs definition to boot the device using USB and network boot.
  - [USB boot] (example-lava-job/minnowboard-job-USB-boot.yaml)
- - [network boot] (example-lava-job/minnowboard-job-newtork-boot.yaml)
+ - [network boot] (example-lava-job/minnowboard-job-network-boot.yaml)
 
 ## Supported platform
 Current we support Minnowboard-turbot which is x86 platform on LAVA. Device configuration for minnowboard is available [here] (../lava-config/dispatcher-config/device-types/minnowboard.jinja2)
