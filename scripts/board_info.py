@@ -38,7 +38,11 @@ def get_network_info():
                 addr = netifaces.ifaddresses(inet)
                 net_info = addr[netifaces.AF_INET]
                 net_hw = addr[netifaces.AF_LINK]
-                net_info = {"interface": inet, "ipaddr": net_info[0]['addr'], "netmask": net_info[0]['netmask'], "broadcast": net_info[0]['broadcast'], "macaddr": net_hw[0]['addr']}
+                net_info = {"interface": inet, 
+                            "ipaddr": net_info[0]['addr'], 
+                            "netmask": net_info[0]['netmask'], 
+                            "broadcast": net_info[0]['broadcast'], 
+                            "macaddr": net_hw[0]['addr']}
                 nets.update(net_info)
     except Exception as e:
         print("type error: " + str(e))
