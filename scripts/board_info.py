@@ -11,6 +11,7 @@ import subprocess
 import json
 import re
 import os
+import sys
 from shutil import copyfile
 
 #try:
@@ -100,7 +101,22 @@ def copy_to(src, dest, filename):
 def get_user():
     return subprocess.check_output(['whoami']).decode().strip('\n')
 
+def do_mountnfs(nfsserver, src, dest):
+    cmd = 'mkdir -p %s; mount %s:%s %s' % (dest, nfsserver, src, dest)
+    p = subprocess.run(cmd, shell=True, timeout=10)
+        if p.returncode == 0:
+            print('[  OK  ] Successfully mount to NFS server')
+        else:
+            print('[  ERROR  ] Failed to mount NFS server')
+
 def main():
+    nfsserver = sys.argv[1]
+    nfssrc = sys.argv[2]
+    dest = sys.argv[3]
+    try:
+        do_mountnfs(nfsserver, nfssrc, dest)
+    except subprocess.TimeoutExpired:
+        print('[  ERROR  ] NFS server not found')
     data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": show_netinfo()}
     path = '/home/root'
     json_file = 'board_info.json'
