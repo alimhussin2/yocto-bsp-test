@@ -1,6 +1,5 @@
 aobench
 asmfish
-blender
 blogbench
 compilebench
 compress-xz
