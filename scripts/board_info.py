@@ -122,13 +122,13 @@ def create_lava_dir():
     return lava_dir
 
 if __name__ == "__main__":
-    nfsserver = sys.argv[1]
-    nfssrc = sys.argv[2]
-    dest = sys.argv[3]
-    try:
-        do_mountnfs(nfsserver, nfssrc, dest)
-    except subprocess.TimeoutExpired:
-        print('[  ERROR  ] NFS server not found')
+    #nfsserver = sys.argv[1]
+    #nfssrc = sys.argv[2]
+    #dest = sys.argv[3]
+    #try:
+    #    do_mountnfs(nfsserver, nfssrc, dest)
+    #except subprocess.TimeoutExpired:
+    #    print('[  ERROR  ] NFS server not found')
     data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": show_netinfo()}
     path = '/home/root'
     json_file = 'board_info.json'
