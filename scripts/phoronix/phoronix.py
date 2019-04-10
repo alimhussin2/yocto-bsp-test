@@ -13,7 +13,7 @@ import ntpath
 import xml.etree.ElementTree as ET
 import sys
 from os import environ
-from .ptsxml2json import convert_xmltojson
+from ptsxml2json import convert_xmltojson
 sys.path.append('../utils/')
 from create_archives import *
 
@@ -142,7 +142,7 @@ def register_arguments():
     parser.add_argument("--cache-directory", help="path to store cache files")
     parser.add_argument("--proxy-address", help="Hostname of proxy server. e.g proxy.com")
     parser.add_argument("--proxy-port", help="port number of proxy server")
-    parser.add_argument("--convert-json", help="convert phoronix test results to json format")
+    parser.add_argument("--convert-json", action="store_true", help="convert phoronix test results to json format")
     args = parser.parse_args()
     return args
 
