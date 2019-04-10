@@ -13,6 +13,8 @@ import re
 import os
 import sys
 from shutil import copyfile
+sys.path.append('utils/')
+from create_archives import *
 
 #try:
 #    import netifaces
@@ -104,12 +106,22 @@ def get_user():
 def do_mountnfs(nfsserver, src, dest):
     cmd = 'mkdir -p %s; mount %s:%s %s' % (dest, nfsserver, src, dest)
     p = subprocess.run(cmd, shell=True, timeout=10)
-        if p.returncode == 0:
-            print('[  OK  ] Successfully mount to NFS server')
-        else:
-            print('[  ERROR  ] Failed to mount NFS server')
+    if p.returncode == 0:
+        print('[  OK  ] Successfully mount to NFS server')
+    else:
+        print('[  ERROR  ] Failed to mount NFS server')
 
-def main():
+def create_lava_dir():
+    ww_dir = create_archives_by_daily(None, True)
+    lava_dir = os.path.join(ww_dir, 'lava')
+    lava_id = get_lava_dir()
+    for i in lava_id:
+        lava_dir = os.path.join(lava_dir, i)
+    if not os.path.exists(lava_dir):
+        os.makedirs(lava_dir)
+    return lava_dir
+
+if __name__ == "__main__":
     nfsserver = sys.argv[1]
     nfssrc = sys.argv[2]
     dest = sys.argv[3]
@@ -121,9 +133,10 @@ def main():
     path = '/home/root'
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
+    info_file = os.path.join(path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
     #load_board_info(os.path.join(path, json_file))
     dest_board_info = '/srv/data/LAVA/lava-job/' + get_lava_job_id()
-    copy_to(os.path.join(path, json_file), dest_board_info ,'board_info.json')
+    copy_to(info_file, dest_board_info ,'board_info.json')
+    copy_to(info_file, create_lava_dir(), 'board_info.json')
 
-main()
