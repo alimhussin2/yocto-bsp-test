@@ -49,11 +49,15 @@ def get_network_info():
     return nets
 
 def get_ipaddr(iface):
-    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s |grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; echo $_RAW_STREAM_V4 | awk '{print$1}'" % iface
+    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
+           grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; \
+           echo $_RAW_STREAM_V4 | awk '{print$1}'" % iface
     return subprocess.check_output(cmd, shell=True).decode().strip('\n')
 
 def get_broadcast(iface):
-    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s |grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; echo $_RAW_STREAM_V4 | awk '{print$3}'" % iface
+    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
+           grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; \
+           echo $_RAW_STREAM_V4 | awk '{print$3}'" % iface
     return subprocess.check_output(cmd, shell=True).decode().strip('\n')
 
 def get_macaddr(iface):
@@ -63,11 +67,16 @@ def get_macaddr(iface):
     return macaddr
 
 def show_netinfo():
-    cmd = "IFACES=`/sbin/ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]'`; echo $IFACES | awk  '{ print $1 }'"
+    cmd = "IFACES=`/sbin/ifconfig | \
+           grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]'`; \
+           echo $IFACES | awk  '{ print $1 }'"
     iface = subprocess.check_output(cmd, shell=True).decode().strip('\n')
     print(iface)
     net_info = {}
-    net_info = {"interface": iface, "ipaddr": get_ipaddr(iface), "broadcast": get_broadcast(iface), "macaddr": get_macaddr(iface)}
+    net_info = {"interface": iface, 
+                "ipaddr": get_ipaddr(iface), 
+                "broadcast": get_broadcast(iface), 
+                "macaddr": get_macaddr(iface)}
     return net_info
 
 def get_kernel_version():
@@ -133,7 +142,11 @@ if __name__ == "__main__":
     #    do_mountnfs(nfsserver, nfssrc, dest)
     #except subprocess.TimeoutExpired:
     #    print('[  ERROR  ] NFS server not found')
-    data = {"lava_job_id": get_lava_job_id(), "kernel": get_kernel_version(), "user": get_user(), "hostname": get_hostname(), "network": show_netinfo()}
+    data = {"lava_job_id": get_lava_job_id(), 
+            "kernel": get_kernel_version(), 
+            "user": get_user(), 
+            "hostname": get_hostname(), 
+            "network": show_netinfo()}
     path = '/home/root'
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
