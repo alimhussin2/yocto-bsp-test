@@ -1,0 +1,42 @@
+device_type: minnowboard
+job_name: Kernel selftest linux-intel 4.14.66 on (master)
+timeouts:
+  job:
+    minutes: 720
+  action:
+    minutes: 720
+  connection:
+    minutes: 720
+priority: medium
+visibility: public
+ actions:
+- deploy:
+    timeout:
+      minutes: 60
+    to: tftp
+    kernel:
+      url: file:///srv/data/builds/intel-corei7-64/yocto_kernel/intel-linux-4.14/bzImage-4.14.66-kselftest
+    modules:
+      url: file:///srv/data/builds/intel-corei7-64/yocto_kernel/intel-linux-4.14/modules-4.14.66-intel-corei7-64-kselftest.tgz
+      compression: gz
+    nfsrootfs:
+      url: file:///srv/data/builds/intel-corei7-64/yocto_2.6_next/core-image-sato-sdk-intel-corei7-64-20180913164633.rootfs.tar.gz
+      compression: gz
+    os: oe
+ - boot:
+    timeout:
+      minutes: 60
+    method: grub
+    commands: nfs
+    auto_login: { login_prompt: 'intel-corei7-64 login:', username: root }
+    prompts:
+      - 'root@intel-corei7-64:~#'
+ - test:
+    timeout:
+      minutes: 720
+    name: kselftest
+    definitions:
+    - repository: https://github.com/alimhussin2/yocto-bsp-test.git
+      from: git
+      path: scripts/kselftest/analyze_kselftest.yaml
+      name: kselftest

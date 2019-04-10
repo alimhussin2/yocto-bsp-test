@@ -1,7 +1,7 @@
 #!/bin/bash
 
-timeout=7200  # seconds
-
+timeout=43200  # seconds
+DELAY=10
 run_timer() {
 local timer=0
 file_minnow_done="$HOME/minnow.idle.done"
@@ -15,8 +15,8 @@ do
        echo 'Idle process has been terminated...'
        break
    else
-       sleep 1
-       timer=$(( $timer + 1 ))
+       sleep $DELAY
+       timer=$(( $timer + $DELAY ))
        echo "waiting...$timer seconds"
    fi
    if [[ $timer == $timeout ]]; then

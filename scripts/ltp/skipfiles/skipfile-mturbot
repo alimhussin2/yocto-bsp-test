@@ -1,0 +1,6 @@
+# This is test that not working on Minnowboard-turbot
+# fork12 from crashme cause the kernel hang.
+fork12 fork12
+
+# sched
+time-schedule01  time-schedule

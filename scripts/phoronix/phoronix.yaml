@@ -1,7 +1,7 @@
 metadata:
-    name: bsp-ptest
+    name: phoronix-test-suite
     format: "Lava-Test-Shell Test Definition 1.0"
-    description: "Testing kernel with kselftest"
+    description: "Phoronix Benchmark test"
     version: 0.1
     maintainer: 
         - alimhussin2@gmail.com
@@ -13,13 +13,25 @@ metadata:
         - functional
     environment:
         - lava-test-shell
+params:
+        PROXY_SERVER : ""
+        PROXY_PORT : ""
+        INSTALLED_TESTS_DIR : ""
+        DL_CACHE_DIR : ""
+        RESULTS_DIR : ""
+        TESTSUITES : ""
+        UPLOAD_DIR : ""
 run:
     steps:
         - ls -l
         - chmod 755 -R scripts
         - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
-        - lava-test-case  "run_kselftest" --shell "bash scripts/kselftest/analyze_kselftest.sh --url default --upload '/srv/data/LAVA/lava-job'"
+        - cd scripts/phoronix
+        - python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR}
+        - python3 phoronix.py --run-tests ${TESTSUITES}
+        - python3 phoronix.py --upload-results ${UPLOAD_DIR}
+
         
 parse:
     pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
@@ -27,3 +39,4 @@ parse:
         ERROR: fail
         FAIL: fail
         PASS: pass
+

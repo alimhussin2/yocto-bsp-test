@@ -1,7 +1,7 @@
 metadata:
-    name: bsp-ptest
+    name: phoronix-test-suite
     format: "Lava-Test-Shell Test Definition 1.0"
-    description: "Testing Yocto Project with ptest-runner"
+    description: "Benchmark graphics using glmark2 and glmark2-es"
     version: 0.1
     maintainer: 
         - alimhussin2@gmail.com
@@ -13,15 +13,16 @@ metadata:
         - functional
     environment:
         - lava-test-shell
+
 run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - bash scripts/board_config
-        - python3 scripts/board_info.py
-        - cd scripts
-        - bash run_ptest
-        - python3 lava_wait.py
+        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
+        - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
+        - cd scripts/glmark2
+        - python3 run_glmark2.py
+
         
 parse:
     pattern: "(?P<test_case_id>.*)\\s+(?P<result>PASS|FAIL|ERROR)\\s+"
@@ -29,3 +30,4 @@ parse:
         ERROR: fail
         FAIL: fail
         PASS: pass
+

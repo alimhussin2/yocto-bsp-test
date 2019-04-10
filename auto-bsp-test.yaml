@@ -13,12 +13,17 @@ metadata:
         - functional
     environment:
         - lava-test-shell
+
+params:
+        NFSSERVER: ""
+        NFSSRC: ""
+        NFSDEST: ""
 run:
     steps:
         - ls -l
         - chmod 755 -R scripts
         - bash scripts/board_config
-        - python3 scripts/board_info.py
+        - python3 scripts/board_info.py ${NFSSERVER} ${NFSSRC} ${NFSDEST}
         - env
         - cd scripts
         - python3 lava_wait.py

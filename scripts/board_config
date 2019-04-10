@@ -7,20 +7,41 @@ LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
 source $LAVA_PROXY
 echo "[  INFO  ] Set proxy"
 
+echo "[  INFO  ] Detecting network interface"
+sleep 5
+while [ 1 ]; do
+    interfaces=`ifconfig | grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]' | awk -F ' ' '{ print $1 }'`
+    if [[ ! -z $interfaces ]]; then
+        break
+    fi
+    [ "$retry" == "3" ] && break
+    echo "[  RETRY  ] Detecting network interface"
+    sleep 5
+    retry=$(( retry+1 ))
+done
+
+lava_show_ipaddr=`which lava-echo-ipv4`
+if [[ ! $? -eq 0 ]]; then
+    lava_show_ipaddr="/$LAVA_DIR/bin/lava-echo-ipv4"
+fi
+for iface in $interfaces; do
+    echo "[  INFO  ] Board boot up successfully. Board ipaddr is `bash $lava_show_ipaddr $iface`"
+done
+
 echo "[  INFO  ] Install netifaces"
 pip3 install --proxy=$http_proxy netifaces
 
-echo "[  INFO  ] Install buildbot-worker"
-pip3 install --proxy=$http_proxy buildbot-worker
-git clone https://git.yoctoproject.org/git/yocto-autobuilder2
-git clone https://git.yoctoproject.org/git/yocto-autobuilder-helper
-buildbot-worker create-worker --umask=0o22 ~/yocto-worker $YOCTO_CONTROLLER `hostname` $BUILDBOT_PASS
-buildbot-worker start ~/yocto-worker
-if [[ $? -eq 0 ]]; then
-    echo "[  OK  ] Buildbot-worker start successfully"
-else
-   echo "[  ERROR  ] Unable to start buildbot-worker"
-fi
+#echo "[  INFO  ] Install buildbot-worker"
+#pip3 install --proxy=$http_proxy buildbot-worker
+#git clone https://git.yoctoproject.org/git/yocto-autobuilder2
+#git clone https://git.yoctoproject.org/git/yocto-autobuilder-helper
+#buildbot-worker create-worker --umask=0o22 ~/yocto-worker $YOCTO_CONTROLLER `hostname` $BUILDBOT_PASS
+#buildbot-worker start ~/yocto-worker
+#if [[ $? -eq 0 ]]; then
+#    echo "[  OK  ] Buildbot-worker start successfully"
+#else
+#   echo "[  ERROR  ] Unable to start buildbot-worker"
+#fi
 
 if [[ ! -d "/srv/data" ]]; then
     mkdir -p /srv/data
@@ -29,7 +50,7 @@ else
     echo "[  INFO  ] Directory /srv/data exists"
 fi
 echo "[  INFO  ] Mount to nfs server"
-mount nfsserver:/srv/data /srv/data
+mount -o rw,hard,intr nfsserver:/srv/data /srv/data
 
 echo "[  INFO  ] Set hostname"
 sed -i "s/localhost.localdomain/`hostname`/g" /etc/hosts
@@ -53,3 +74,14 @@ else
     echo "[  ERROR  ] Unable to mount to nfs server"
 fi
 
+#list_media=`ls /run/media`
+#if [[ ! -z ${list_media} ]];
+#then
+#    for media in ${list_media}
+#    do 
+#        echo "[  INFO  ] umount /run/media/${media}"
+#        umount /run/media/${media}
+#    done
+#else
+#    echo "[  INFO  ] No media attach to device"
+#fi

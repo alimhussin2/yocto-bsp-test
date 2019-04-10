@@ -3,6 +3,7 @@
 # Description: Download kselftest, run & parse the result. 
 # The output result is results-summary-kselftest-version.log
 
+LINUX_MIRROR="http://mirrors.edge.kernel.org/pub/linux/kernel/v4.x"
 DEFAULT_KSELFTEST="/srv/data/LAVA/kernel/kselftest-4.14.tar.gz"
 LOGFILE="kselftest-`uname -r`.log"
 RESULT_FILE="results-$LOGFILE"
@@ -12,10 +13,20 @@ RESULT_SUMMARY="results-summary-$LOGFILE"
 RESULT_COMPONENTS="results-by-component-$LOGFILE"
 
 usage() {
-    echo "Usage :$0 [-u|--url,    url of kselftest]
-                    [-U|--upload, path to uploaded file]"
+    echo "Usage :$0 [-u|--url,                  url of kselftest]
+                    [-U|--upload,               path to uploaded file]
+                    [-a|--analyze [filename],   analyze kselftest result]"
     exit 1
 }
+
+set_proxy() {
+    LAVA_DIR=$(ls / | grep lava)
+    LAVA_PROXY="/$LAVA_DIR/bin/lava-proxy"
+
+    source $LAVA_PROXY
+    echo "[  INFO  ] Set proxy"
+}
+
 parse_output() {
     sed -r 's/(.*selftests: (\S+): (\S+) \[(.*)\])/\1\nselftests: \2_\3 [\4]/' "${LOGFILE}" > "${LOGFILE_TEMP}"
     grep "selftests:" "${LOGFILE_TEMP}" > "${RESULT_FILE}"
@@ -54,8 +65,33 @@ details() {
     grep "SKIP" ${RESULT_FILE}
 }
 
+list_components_result() {
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' | grep -v "test" > $RESULT_TEMP
+    echo "Summary by components"
+    echo "============================="
+    echo "  Components, Pass, Fail, Skip"
+    local n=0
+    while true;
+    do
+        local components=$(head -n1 $RESULT_TEMP)
+        if [[ -z $components ]]; then
+            break
+        else
+            cpass=`cat $RESULT_FILE | grep PASS | grep $components | wc -l`
+            cfail=`cat $RESULT_FILE | grep FAIL | grep $components | wc -l`
+            cskip=`cat $RESULT_FILE | grep SKIP | grep $components | wc -l`
+            sed -i "/$components/d" $RESULT_TEMP
+            #echo "   $components:  (PASS=$cpass | FAIL=$cfail | SKIP=$cskip)"
+            echo "  $components, $cpass, $cfail, $cskip"
+            n=$(( n+1 ))
+        fi
+    done
+    echo -e "\n============================"
+    echo -e "Total components tested: $n\n\n"
+}
+
 details_by_components() {
-    cat $RESULT_FILE | grep PASS | awk -F '_' '{ print $1 }' > $RESULT_TEMP
+    cat $RESULT_FILE | grep -E '(PASS|FAIL|SKIP)' | awk -F '_' '{ print $1 }' | grep -v "test" > $RESULT_TEMP
     while true;
     do
         component=$(head -n1 $RESULT_TEMP)
@@ -100,7 +136,12 @@ analyze_kselftest_results() {
     parse_output
     info
     summary
+    list_components_result
     details_by_components
+}
+
+cleanup() {
+    rm $LOGFILE_TEMP $RESULT_TEMP $RESULT_FILE
 }
 
 option() {
@@ -109,17 +150,30 @@ option() {
             -u|--url)
                 if [[ ! -z "$2" ]]; then
                     if [[ "$2" == "default" ]]; then
-                        echo "Download kselftest from local directory"
-                        cp $DEFAULT_KSELFTEST .
+                        set_proxy
+                        echo "Download kselftest from kernel mirror"
+                        version=`uname -r`
+                        kernel_version=${version//[a-zA-Z-]/}
+                        echo "Downloading ${LINUX_MIRROR}/linux-${kernel_version}.tar.xz"
+                        wget ${LINUX_MIRROR}/linux-${kernel_version}.tar.xz
                     elif [[ -z "${2##*http*}" ]]; then
                         echo "Download kselftest from given url"
-                        wget $2 -O kselftest-4.14.tar.gz
+                        wget $2 -O linux-$kernel_version.tar.xz
                     else
                         echo "Input error. See usage"
                         usage
                     fi
-                    tar xf "kselftest-4.14.tar.gz"
-                    cd "kselftest"
+                    if [ -f "linux-${kernel_version}.tar.xz" ]; then
+                        tar -xJf "linux-${kernel_version}.tar.xz"
+                    else
+                        echo "[  Error  ] linux-${kernel_version}.tar.xz not found!"
+                        exit 1
+                    fi
+                    if [[ -f "$RESULT_COMPONENTS" ]]; then
+                        rm -f "$RESULT_SUMMARY" "$RESULT_COMPONENTS"
+                    fi
+                    make -C $PWD/linux-$kernel_version/tools/testing/selftests run_tests 2>&1 | tee ${LOGFILE}
+                    analyze_kselftest_results >> $RESULT_COMPONENTS
                 else
                     echo "Unable to execute kselftest. No url given"
                     exit 1
@@ -129,9 +183,27 @@ option() {
                 UPLOADED_DIR=$2
                 lava_job=`ls / | grep lava`; lava_id=${lava_job/lava-/}
                 UPLOADED_DIR="$UPLOADED_DIR/$lava_id"
+                if [[ ! -d $UPLOADED_DIR ]]; then
+                    mkdir $UPLOADED_DIR
+                fi
                 echo "Upload result to $UPLOADED_DIR"
                 cp $RESULT_COMPONENTS $UPLOADED_DIR
                 cp $LOGFILE $UPLOADED_DIR
+                cleanup
+                exit 0
+            ;;
+            -a|--analyze)
+                echo "Analyze kselftest results"
+                if [[ -z "$2" ]]; then
+                    echo "Kselftest results file missing. Abort"
+                    usage
+                else
+                    LOGFILE=$2
+                    OUTPUT_ANALYZE=results-by-component-$LOGFILE
+                    analyze_kselftest_results >> $OUTPUT_ANALYZE
+                    echo "Complete analyzing kselftest results"
+                fi
+                cleanup
                 exit 0
             ;;
             *)
@@ -148,16 +220,10 @@ main() {
         usage
     else
         option "${POSITIONAL[@]}"
-        echo $PWD
-        echo "./run_kselftest.sh 2>&1 | tee ${LOGFILE}"
-        if [[ -f "$RESULT_COMPONENTS" ]]; then
-            rm -f "$RESULT_SUMMARY" "$RESULT_COMPONENTS"
-        fi
-        analyze_kselftest_results >> $RESULT_COMPONENTS
     fi
 }
 
 POSITIONAL=()
 POSITIONAL+=("$@")
 main "${POSITIONAL[@]}"
-
+cleanup
