@@ -13,7 +13,11 @@ import re
 import os
 import sys
 from shutil import copyfile
-sys.path.append('utils/')
+utilsdir=os.path.abspath(os.path.dirname(__file__))
+putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+print("INFO: %s" % utilsdir)
+print("INFO: %s" % putilsdir)
+sys.path.append(utilsdir)
 from create_archives import *
 
 #try:
