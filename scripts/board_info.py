@@ -13,7 +13,7 @@ import re
 import os
 import sys
 from shutil import copyfile
-utilsdir=os.join.path(os.path.abspath(os.path.dirname(__file__)), "utils")
+utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
 putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 print("INFO: %s" % utilsdir)
 print("INFO: %s" % putilsdir)
