@@ -15,8 +15,8 @@ import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
 sys.path.append('../utils/')
-from create_archives import *
-from basic_config import *
+import create_archives
+import basic_config
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
