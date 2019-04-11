@@ -18,7 +18,7 @@ from ptsxml2json import convert_xmltojson
 utilsdir=os.path.abspath(os.path.dirname(__file__))
 putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 print("INFO: %s" % utilsdir)
-print("INFO: %s" %s putilsdir)
+print("INFO: %s" % putilsdir)
 sys.path.append(utilsdir)
 from create_archives import *
 
