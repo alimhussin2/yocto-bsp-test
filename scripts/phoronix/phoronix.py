@@ -15,7 +15,7 @@ import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
 
-utilsdir=os.path.abspath(os.path.dirname(__file__))
+utilsdir=os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "utils")
 putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 print("INFO: %s" % utilsdir)
 print("INFO: %s" % putilsdir)
