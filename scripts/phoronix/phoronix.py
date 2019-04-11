@@ -16,6 +16,7 @@ from os import environ
 from ptsxml2json import convert_xmltojson
 sys.path.append('../utils/')
 from create_archives import *
+from basic_config import *
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
@@ -143,6 +144,7 @@ def register_arguments():
     parser.add_argument("--proxy-address", help="Hostname of proxy server. e.g proxy.com")
     parser.add_argument("--proxy-port", help="port number of proxy server")
     parser.add_argument("--convert-json", action="store_true", help="convert phoronix test results to json format")
+    parser.add_argument("--nfs-mount", help="do nfs mount by providing argument as nfsserver, src, dest", nargs = '*')
     args = parser.parse_args()
     return args
 
@@ -158,6 +160,7 @@ if __name__ == "__main__":
     proxy_address = args.proxy_address
     proxy_port = args.proxy_port
     convert_json = args.convert_json
+    nfs_mount = args.nfs_mount
 
     check_pkg()
     #check phoronix configuration file
@@ -177,6 +180,11 @@ if __name__ == "__main__":
             configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
+        if nfs_mount:
+            nfs_server = args.nfs_mount[0]
+            nfs_src = args.nfs_mount[1]
+            nfs_dest = args.nfs_mount[2]
+            do_mountnfs(nfs_server, nfs_src, nfs_dest)
         auto_publish_results(get_resultsdir())
     if compare_results:
         results1 = args.compare_results[0]
@@ -199,4 +207,3 @@ if __name__ == "__main__":
                 convert_xmltojson(result)
             else:
                 print('ERROR: %s is not exist!' % result)
-
