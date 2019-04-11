@@ -14,7 +14,12 @@ import xml.etree.ElementTree as ET
 import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
-sys.path.append('../utils/')
+
+utilsdir=os.path.abspath(os.path.dirname(__file__))
+putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+print("INFO: %s" % utilsdir)
+print("INFO: %s" %s putilsdir)
+sys.path.append(utilsdir)
 from create_archives import *
 
 def check_pkg():
