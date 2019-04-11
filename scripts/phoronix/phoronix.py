@@ -116,10 +116,10 @@ def publish_results(results, upload_server):
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
     print("INFO: %s" % results)
-    for r in results:
-        cmd = "cp -f %s %s" % (r, upload_server)
-        output = subprocess.check_output(cmd, shell=True).decode()
-        print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
+    #for r in results:
+    cmd = "cp -rf %s/* %s" % (results[0], upload_server)
+    output = subprocess.check_output(cmd, shell=True).decode()
+    print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
 
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
