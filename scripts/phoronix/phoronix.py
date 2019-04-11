@@ -116,7 +116,7 @@ def publish_results(results, upload_server):
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
     for r in results:
-        cmd = "cp -r %s %s" % (r, upload_server)
+        cmd = "cp -f %s %s" % (r, upload_server)
         output = subprocess.check_output(cmd, shell=True).decode()
         print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
 
