@@ -21,6 +21,9 @@ params:
         RESULTS_DIR : ""
         TESTSUITES : ""
         UPLOAD_DIR : ""
+        NFS_SERVER : ""
+        NFS_SRC : ""
+        NFS_DEST : ""
 run:
     steps:
         - ls -l
@@ -29,7 +32,7 @@ run:
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
         - cd scripts/phoronix
         - python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR}
-        - python3 phoronix.py --run-tests ${TESTSUITES}
+        - python3 phoronix.py --run-tests ${TESTSUITES} --nfs-mount ${NFS_SERVER} ${NFS_SRC} ${NFS_DEST}
         - python3 phoronix.py --upload-results ${UPLOAD_DIR}
 
         
