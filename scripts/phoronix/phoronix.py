@@ -134,7 +134,7 @@ def auto_publish_results(results):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     for result in results:
-        cmd = 'cp -r %s %s' % (result, upload_dir)
+        cmd = 'cp -rf %s/* %s' % (result, upload_dir)
         subprocess.check_output(cmd, shell=True).decode()
         print('Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
 
