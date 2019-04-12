@@ -14,9 +14,14 @@ import xml.etree.ElementTree as ET
 import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
-sys.path.append('../utils/')
-from create_archives import *
-from basic_config import *
+try:
+    utilsdir=os.path.abspath(os.path.dirname(__file__)).replace('phoronix', 'utils')
+    sys.path.append(utilsdir)
+    from create_archives import *
+    from basic_config import *
+except:
+    print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
+
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
