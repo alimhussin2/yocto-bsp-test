@@ -19,8 +19,8 @@ try:
     utilsdir = os.path.join(ntpath.split(utilsdir)[0], 'utils')
     sys.path.append(utilsdir)
     print(sys.path)
-    import create_archives
-    import basic_config
+    from create_archives import *
+    from basic_config import *
 except:
     print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
 
