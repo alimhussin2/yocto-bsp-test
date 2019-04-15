@@ -15,7 +15,7 @@ import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
 try:
-    utilsdir=os.path.abspath(os.path.dirname(__file__)).replace('phoronix', 'utils')
+    utilsdir=os.path.abspath(os.path.dirname('__file__')).replace('phoronix', 'utils')
     sys.path.append(utilsdir)
     from create_archives import *
     from basic_config import *
