@@ -17,6 +17,7 @@ from ptsxml2json import convert_xmltojson
 try:
     utilsdir=os.path.abspath(os.path.dirname('__file__')).replace('phoronix', 'utils')
     sys.path.append(utilsdir)
+    print(sys.path)
     import create_archives
     import basic_config
 except:
