@@ -17,8 +17,8 @@ from ptsxml2json import convert_xmltojson
 try:
     utilsdir=os.path.abspath(os.path.dirname('__file__')).replace('phoronix', 'utils')
     sys.path.append(utilsdir)
-    from create_archives import *
-    from basic_config import *
+    import create_archives
+    import basic_config
 except:
     print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
 
