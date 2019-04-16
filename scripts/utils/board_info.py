@@ -9,13 +9,7 @@ import re
 import os
 import sys
 from shutil import copyfile
-try:
-    #utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
-    #sys.path.append(utilsdir)
-    from create_archives import *
-except:
-    print("ERROR: Unable to import module create_archives located in %s" % utilsdir)
-    sys.exit(0)
+from create_archives import *
 
 def get_ipaddr(iface):
     cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
