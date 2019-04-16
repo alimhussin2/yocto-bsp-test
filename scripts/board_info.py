@@ -128,6 +128,19 @@ def do_mountnfs(nfsserver, src, dest):
     else:
         print('[  ERROR  ] Failed to mount NFS server')
 
+def get_board_info(dest):
+    f_board_info = os.path.join(dest, get_lava_job_id())
+    f_board_info = os.path.join(f_board_info, 'board_info.json')
+    return f_board_info
+
+def update_board_info(path_board_info, data):
+    b_info = os.path.join(path_board_info, 'board_info.json')
+    with open(b_info) as f:
+        feed = json.load(f)
+    feed.update(data)
+    with open(b_info, 'w') as f:
+        json.dump(feed, f, sort_keys=False, indent=4, separators=(',',': '))
+
 def create_lava_dir():
     ww_dir = create_archives_by_daily(None, True)
     lava_dir = os.path.join(ww_dir, 'lava')
@@ -157,7 +170,7 @@ if __name__ == "__main__":
     info_file = os.path.join(path, json_file)
     print('Board info was created at %s' % (os.path.join(path, json_file)))
     #load_board_info(os.path.join(path, json_file))
-    dest_board_info = '/srv/data/LAVA/lava-job/' + get_lava_job_id()
+    dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
     copy_to(info_file, dest_board_info ,'board_info.json')
     copy_to(info_file, create_lava_dir(), 'board_info.json')
 
