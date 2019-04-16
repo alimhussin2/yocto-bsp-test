@@ -21,6 +21,7 @@ try:
     print(sys.path)
     from create_archives import *
     from basic_config import *
+    from board_info import update_board_info
 except:
     print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
 
@@ -125,8 +126,10 @@ def publish_results(results, upload_server):
 
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
-    upload_dir = os.path.join(ww_dir, 'lava')
+    base_dir = os.path.join(ww_dir, 'lava')
+    upload_dir = base_dir
     lava_dirs = get_lava_dir()
+    phoronixResultsDir = []
     for lava_dir in lava_dirs:
         phoronix_dir = 'phoronix-test-suite'
         suffix_path = get_boardinfo() + '/' + get_os()
@@ -138,7 +141,16 @@ def auto_publish_results(results):
     for result in results:
         cmd = 'cp -r %s %s' % (result, upload_dir)
         subprocess.check_output(cmd, shell=True).decode()
-        print('Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
+        print('INFO: Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
+        phoronixResultsDir.append(os.path.join(upload_dir, get_resultsfiles(result)))
+    data = {"phoronixResults" : phoronixResultsDir}
+    for lava_dir in lava_dirs:
+        b_info = os.path.join(base_dir, lava_dir) + '/board_info.json'
+        if os.path.isfile(b_info):
+            print('INFO: Successfully updated %s' % b_info)
+            update_board_info(os.path.join(base_dir, lava_dir), data)
+        else:
+            print('ERROR: Unable to update %s. File is missing.' % b_info)
 
 def register_arguments():
     parser = argparse.ArgumentParser()
