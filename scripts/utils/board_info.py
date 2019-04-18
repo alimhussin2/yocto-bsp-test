@@ -2,10 +2,6 @@
 
 # Description: This script is used to get network interfaces,
 # IP address, netmask and broadcast from device under test.
-# Dependency: 
-#  - netifaces
-#  - paramiko
-# to install use pip. Example, pip3 install paramiko
 
 import subprocess
 import json
@@ -13,46 +9,7 @@ import re
 import os
 import sys
 from shutil import copyfile
-
-try:
-    utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
-    sys.path.append(utilsdir)
-    from create_archives import *
-except:
-    print("ERROR: Unable to import module create_archives located in %s" % utilsdir)
-    sys.exit(0)
-
-#try:
-#    import netifaces
-#except ImportError:
-#    print("Module netifaces not install in the system. To install use pip3 install netifaces")
-#    exit()
-
-# function deprecated
-def get_interfaces():
-    return netifaces.interfaces()
-
-# function deprecated
-def get_network_info():
-    iface = netifaces.interfaces()
-    nets = {}
-    net_info = {}
-    try:
-        for inet in iface:
-            net_face = ''.join([i for i in inet if not i.isdigit()])
-            if net_face == 'eno' or net_face == 'eth':
-                addr = netifaces.ifaddresses(inet)
-                net_info = addr[netifaces.AF_INET]
-                net_hw = addr[netifaces.AF_LINK]
-                net_info = {"interface": inet, 
-                            "ipaddr": net_info[0]['addr'], 
-                            "netmask": net_info[0]['netmask'], 
-                            "broadcast": net_info[0]['broadcast'], 
-                            "macaddr": net_hw[0]['addr']}
-                nets.update(net_info)
-    except Exception as e:
-        print("type error: " + str(e))
-    return nets
+from create_archives import *
 
 def get_ipaddr(iface):
     cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
@@ -77,7 +34,7 @@ def show_netinfo():
            grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]'`; \
            echo $IFACES | awk  '{ print $1 }'"
     iface = subprocess.check_output(cmd, shell=True).decode().strip('\n')
-    print(iface)
+    print('INFO: Detected network interface... %s' % iface)
     net_info = {}
     net_info = {"interface": iface, 
                 "ipaddr": get_ipaddr(iface), 
@@ -112,23 +69,15 @@ def get_lava_job_id():
 
 def copy_to(src, dest, filename):
     if not os.path.exists(dest):
-        print('Directory in %s is not exist. Creating it...' % dest)
+        print('INFO: Directory in %s is not exist. Creating it...' % dest)
         os.makedirs(dest)
         os.chmod(dest, 0o777)
     dest = os.path.join(dest, filename)
-    print('copy from %s to %s' %(src, dest))
+    print('INFO: copy from %s to %s' %(src, dest))
     copyfile(src, dest)
 
 def get_user():
     return subprocess.check_output(['whoami']).decode().strip('\n')
-
-def do_mountnfs(nfsserver, src, dest):
-    cmd = 'mkdir -p %s; mount %s:%s %s' % (dest, nfsserver, src, dest)
-    p = subprocess.run(cmd, shell=True, timeout=10)
-    if p.returncode == 0:
-        print('[  OK  ] Successfully mount to NFS server')
-    else:
-        print('[  ERROR  ] Failed to mount NFS server')
 
 def get_board_info(dest):
     f_board_info = os.path.join(dest, get_lava_job_id())
@@ -154,13 +103,6 @@ def create_lava_dir():
     return lava_dir
 
 if __name__ == "__main__":
-    #nfsserver = sys.argv[1]
-    #nfssrc = sys.argv[2]
-    #dest = sys.argv[3]
-    #try:
-    #    do_mountnfs(nfsserver, nfssrc, dest)
-    #except subprocess.TimeoutExpired:
-    #    print('[  ERROR  ] NFS server not found')
     data = {"lava_job_id": get_lava_job_id(), 
             "kernel": get_kernel_version(), 
             "user": get_user(), 
@@ -170,9 +112,8 @@ if __name__ == "__main__":
     json_file = 'board_info.json'
     create_info_file(data, path, json_file)
     info_file = os.path.join(path, json_file)
-    print('Board info was created at %s' % (os.path.join(path, json_file)))
-    #load_board_info(os.path.join(path, json_file))
+    print('INFO: Board info was created at %s' % (os.path.join(path, json_file)))
     dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
-    copy_to(info_file, dest_board_info ,'board_info.json')
-    copy_to(info_file, create_lava_dir(), 'board_info.json')
+    copy_to(info_file, dest_board_info , json_file)
+    copy_to(info_file, create_lava_dir(), json_file)
 

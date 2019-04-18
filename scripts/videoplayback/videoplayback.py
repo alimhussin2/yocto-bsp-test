@@ -60,9 +60,12 @@ class VideoPlayback():
     def resultToJson(self, cmd, ret, status):
         rawData = ''
         with open('debug_videoplayback.log', 'r') as f:
-            rawData = f.read().decode()
+            rawData = f.read()
             f.close()
-        data = { "test": {"cmd": cmd, "returnCode": ret, "status" : status, "log" : [rawData]}}
+        data = {"test": {"cmd": cmd, 
+                "returnCode": ret, 
+                "status" : status, 
+                "log" : [rawData]}}
         return data
 
 class sanityTestGstreamer(VideoPlayback):

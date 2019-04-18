@@ -15,12 +15,16 @@ import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
 
-utilsdir=os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "utils")
-putilsdir=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-print("INFO: %s" % utilsdir)
-print("INFO: %s" % putilsdir)
-sys.path.append(utilsdir)
-from create_archives import *
+try:
+    utilsdir = os.path.abspath(os.path.dirname('__file__'))
+    utilsdir = os.path.join(ntpath.split(utilsdir)[0], 'utils')
+    sys.path.append(utilsdir)
+    print(sys.path)
+    from create_archives import *
+    from basic_config import *
+    from board_info import update_board_info
+except:
+    print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
@@ -123,8 +127,10 @@ def publish_results(results, upload_server):
 
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
-    upload_dir = os.path.join(ww_dir, 'lava')
+    base_dir = os.path.join(ww_dir, 'lava')
+    upload_dir = base_dir
     lava_dirs = get_lava_dir()
+    phoronixResultsDir = []
     for lava_dir in lava_dirs:
         phoronix_dir = 'phoronix-test-suite'
         suffix_path = get_boardinfo() + '/' + get_os()
@@ -136,7 +142,16 @@ def auto_publish_results(results):
     for result in results:
         cmd = 'cp -rf %s/* %s' % (result, upload_dir)
         subprocess.check_output(cmd, shell=True).decode()
-        print('Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
+        print('INFO: Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
+        phoronixResultsDir.append(os.path.join(upload_dir, get_resultsfiles(result)))
+    data = {"phoronixResults" : phoronixResultsDir}
+    for lava_dir in lava_dirs:
+        b_info = os.path.join(base_dir, lava_dir) + '/board_info.json'
+        if os.path.isfile(b_info):
+            print('INFO: Successfully updated %s' % b_info)
+            update_board_info(os.path.join(base_dir, lava_dir), data)
+        else:
+            print('ERROR: Unable to update %s. File is missing.' % b_info)
 
 def register_arguments():
     parser = argparse.ArgumentParser()
@@ -149,6 +164,7 @@ def register_arguments():
     parser.add_argument("--proxy-address", help="Hostname of proxy server. e.g proxy.com")
     parser.add_argument("--proxy-port", help="port number of proxy server")
     parser.add_argument("--convert-json", action="store_true", help="convert phoronix test results to json format")
+    parser.add_argument("--nfs-mount", help="do nfs mount by providing argument as nfsserver, src, dest", nargs = '*')
     args = parser.parse_args()
     return args
 
@@ -164,6 +180,7 @@ if __name__ == "__main__":
     proxy_address = args.proxy_address
     proxy_port = args.proxy_port
     convert_json = args.convert_json
+    nfs_mount = args.nfs_mount
 
     check_pkg()
     #check phoronix configuration file
@@ -183,6 +200,11 @@ if __name__ == "__main__":
             configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
     if start_tests:
         run_tests(start_tests)
+        if nfs_mount:
+            nfs_server = args.nfs_mount[0]
+            nfs_src = args.nfs_mount[1]
+            nfs_dest = args.nfs_mount[2]
+            do_mountnfs(nfs_server, nfs_src, nfs_dest)
         auto_publish_results(get_resultsdir())
     if compare_results:
         results1 = args.compare_results[0]
@@ -205,4 +227,3 @@ if __name__ == "__main__":
                 convert_xmltojson(result)
             else:
                 print('ERROR: %s is not exist!' % result)
-
