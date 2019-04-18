@@ -1,5 +1,5 @@
 blogbench
-fs-mark
+#fs-mark
 iozone
 sqlite
 unpack-linux
