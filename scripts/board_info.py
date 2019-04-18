@@ -130,7 +130,6 @@ def do_mountnfs(nfsserver, src, dest):
 
 def get_board_info(dest):
     f_board_info = os.path.join(dest, get_lava_job_id())
-    f_board_info = os.path.join(f_board_info, 'board_info.json')
     return f_board_info
 
 def update_board_info(path_board_info, data):
