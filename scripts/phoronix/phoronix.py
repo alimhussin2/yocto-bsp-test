@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 import sys
 from os import environ
 from ptsxml2json import convert_xmltojson
+
 try:
     utilsdir = os.path.abspath(os.path.dirname('__file__'))
     utilsdir = os.path.join(ntpath.split(utilsdir)[0], 'utils')
@@ -24,7 +25,6 @@ try:
     from board_info import update_board_info
 except:
     print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
-
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
@@ -119,8 +119,9 @@ def publish_results(results, upload_server):
     upload_server = os.path.join(upload_server, suffix_path)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
+    print("INFO: %s" % results)
     for r in results:
-        cmd = "cp -r %s %s" % (r, upload_server)
+        cmd = "cp -rf %s/* %s" % (r, upload_server)
         output = subprocess.check_output(cmd, shell=True).decode()
         print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
 
@@ -139,7 +140,7 @@ def auto_publish_results(results):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     for result in results:
-        cmd = 'cp -r %s %s' % (result, upload_dir)
+        cmd = 'cp -rf %s/* %s' % (result, upload_dir)
         subprocess.check_output(cmd, shell=True).decode()
         print('INFO: Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
         phoronixResultsDir.append(os.path.join(upload_dir, get_resultsfiles(result)))

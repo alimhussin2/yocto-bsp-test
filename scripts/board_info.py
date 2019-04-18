@@ -13,6 +13,7 @@ import re
 import os
 import sys
 from shutil import copyfile
+
 try:
     utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
     sys.path.append(utilsdir)
@@ -20,6 +21,7 @@ try:
 except:
     print("ERROR: Unable to import module create_archives located in %s" % utilsdir)
     sys.exit(0)
+
 #try:
 #    import netifaces
 #except ImportError:
