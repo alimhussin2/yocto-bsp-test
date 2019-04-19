@@ -18,13 +18,11 @@ try:
     utilsdir = os.path.abspath(os.path.dirname('__file__'))
     utilsdir = os.path.join(ntpath.split(utilsdir)[0], 'utils')
     sys.path.append(utilsdir)
-    print(sys.path)
     from create_archives import *
     from basic_config import *
     from board_info import update_board_info
-except:
-    print("ERROR: Unable to import module create_archives & basic_config located in %s" % utilsdir)
-
+except Exception as e:
+    print('ERROR: %s in %s' % (e, utilsdir))
 
 def check_pkg():
     output = subprocess.run(['which', 'phoronix-test-suite'])
@@ -139,10 +137,11 @@ def auto_publish_results(results):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     for result in results:
+        dest_dir = os.path.join(upload_dir, get_resultsfiles(result))
         cmd = 'cp -r %s %s' % (result, upload_dir)
         subprocess.check_output(cmd, shell=True).decode()
-        print('INFO: Successfully upload to %s' % os.path.join(upload_dir, get_resultsfiles(result)))
-        phoronixResultsDir.append(os.path.join(upload_dir, get_resultsfiles(result)))
+        print('INFO: Successfully upload to %s' % dest_dir)
+        phoronixResultsDir.append(dest_dir)
     data = {"phoronixResults" : phoronixResultsDir}
     for lava_dir in lava_dirs:
         b_info = os.path.join(base_dir, lava_dir) + '/board_info.json'
