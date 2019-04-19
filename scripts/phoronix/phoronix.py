@@ -79,12 +79,13 @@ def get_resultsdir():
     lresultsdir = []
     for n in root.iter('Testing'):
         resultsdir = n.find('ResultsDirectory').text
-    date = datetime.now().strftime("%Y-%m-%d")
-    lfiles = os.listdir(resultsdir)
-    for f in lfiles:
-        if fnmatch.fnmatch(f, date + '*'):
-            lresultsdir.append(os.path.join(resultsdir, f))
-    return lresultsdir
+    for rd in os.listdir(resultsdir):
+        b = os.path.join(resultsdir, rd)
+        if os.path.isdir(b):
+            lresultsdir.append(b)
+    latest_result = max(lresultsdir, key=os.path.getmtime)
+    return latest_result
+
 
 def get_resultsfiles(resultsdir):
     head, lresultsdir = ntpath.split(resultsdir)     
@@ -117,17 +118,15 @@ def publish_results(results, upload_server):
     upload_server = os.path.join(upload_server, suffix_path)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
-    for r in results:
-        cmd = "cp -r %s %s" % (r, upload_server)
-        output = subprocess.check_output(cmd, shell=True).decode()
-        print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(r)))
+    cmd = "cp -r %s %s" % (results, upload_server)
+    output = subprocess.check_output(cmd, shell=True).decode()
+    print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(results)))
 
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
     base_dir = os.path.join(ww_dir, 'lava')
     upload_dir = base_dir
     lava_dirs = get_lava_dir()
-    phoronixResultsDir = []
     for lava_dir in lava_dirs:
         phoronix_dir = 'phoronix-test-suite'
         suffix_path = get_boardinfo() + '/' + get_os()
@@ -136,13 +135,11 @@ def auto_publish_results(results):
         upload_dir = os.path.join(upload_dir, suffix_path)
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
-    for result in results:
-        dest_dir = os.path.join(upload_dir, get_resultsfiles(result))
-        cmd = 'cp -r %s %s' % (result, upload_dir)
-        subprocess.check_output(cmd, shell=True).decode()
-        print('INFO: Successfully upload to %s' % dest_dir)
-        phoronixResultsDir.append(dest_dir)
-    data = {"phoronixResults" : phoronixResultsDir}
+    dest_dir = os.path.join(upload_dir, get_resultsfiles(results))
+    cmd = 'cp -r %s %s' % (results, upload_dir)
+    subprocess.check_output(cmd, shell=True).decode()
+    print('INFO: Successfully upload to %s' % dest_dir)
+    data = {"phoronixResults" : dest_dir}
     for lava_dir in lava_dirs:
         b_info = os.path.join(base_dir, lava_dir) + '/board_info.json'
         if os.path.isfile(b_info):
@@ -218,9 +215,7 @@ if __name__ == "__main__":
         publish_results(get_resultsdir(), upload_server)
     if convert_json:
         print("INFO: Convert phoronix test results to json format")
-        lresultdirs = get_resultsdir()
-        for resultdir in lresultdirs:
-            result = os.path.join(resultdir, 'composite.xml')
+        result = os.path.join(get_resultsdir(), 'composite.xml')
             if os.path.isfile(result):
                 convert_xmltojson(result)
             else:
