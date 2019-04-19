@@ -57,19 +57,19 @@ sed -i "s/localhost.localdomain/`hostname`/g" /etc/hosts
 
 if [[ $? -eq 0 ]]; then
     echo "[  OK  ] Successfully mount to nfs server"
-    echo "[  INFO  ] Configure vncserver"
-    mkdir ~/.vnc
-    cp $CONF_DIR/vnc/vnc_config ~/.vnc/passwd;
-    chmod 600 ~/.vnc/passwd
-    vncserver :1; vncserver -kill :1
-    rm ~/.vnc/xstartup
-    cp $CONF_DIR/vnc/xstartup ~/.vnc/xstartup; chmod +x ~/.vnc/xstartup
-    vncserver :1
-    if [[ $? -eq 0 ]]; then
-        echo "[  OK  ] Vnc start at :1"
-    else 
-        echo "[  ERROR  ] Unable to start vnc"
-    fi
+    #echo "[  INFO  ] Configure vncserver"
+    #mkdir ~/.vnc
+    #cp $CONF_DIR/vnc/vnc_config ~/.vnc/passwd;
+    #chmod 600 ~/.vnc/passwd
+    #vncserver :1; vncserver -kill :1
+    #rm ~/.vnc/xstartup
+    #cp $CONF_DIR/vnc/xstartup ~/.vnc/xstartup; chmod +x ~/.vnc/xstartup
+    #vncserver :1
+    #if [[ $? -eq 0 ]]; then
+    #    echo "[  OK  ] Vnc start at :1"
+    #else 
+    #    echo "[  ERROR  ] Unable to start vnc"
+    #fi
 else
     echo "[  ERROR  ] Unable to mount to nfs server"
 fi
