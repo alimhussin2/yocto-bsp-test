@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from xml.dom import minidom
+import os
 import re
 try:
     import simplejson as json
@@ -87,8 +88,11 @@ def parse_element(element):
     print(json.dumps(dictData, sort_keys=True, indent=4))
     return dictData
 
-def convert_xmltojson(url):
+def convert_xmltojson(url, dest):
     dom = minidom.parse(url)
-    f = open('phoronix-test-suite.json', 'w')
+    json_result = os.path.join(dest, 'phoronix-test-suite.json')
+    f = open(json_result, 'w')
     f.write(json.dumps(parse_element(dom), sort_keys=True, indent=4))
     f.close()
+    print('INFO: Successfully convert %s to json format.' % url)
+    print('INFO: Json file is store in %s' % json_result)

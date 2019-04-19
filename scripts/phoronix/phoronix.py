@@ -122,6 +122,14 @@ def publish_results(results, upload_server):
     output = subprocess.check_output(cmd, shell=True).decode()
     print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(results)))
 
+def get_base_dir():
+    ww_dir = create_archives_by_daily(None, True)
+    base_dir = os.path.join(ww_dir, 'lava')
+    lava_dirs = get_lava_dir()
+    for lava_dir in lava_dirs:
+        base_dir = os.path.join(base_dir, lava_dir)
+    return base_dir
+
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
     base_dir = os.path.join(ww_dir, 'lava')
@@ -215,8 +223,8 @@ if __name__ == "__main__":
         publish_results(get_resultsdir(), upload_server)
     if convert_json:
         print("INFO: Convert phoronix test results to json format")
-        result = os.path.join(get_resultsdir(), 'composite.xml')
-            if os.path.isfile(result):
-                convert_xmltojson(result)
-            else:
-                print('ERROR: %s is not exist!' % result)
+        raw_result = os.path.join(get_resultsdir(), 'composite.xml')
+        if os.path.isfile(raw_result):
+            convert_xmltojson(raw_result, get_base_dir())
+        else:
+            print('ERROR: %s is not exist!' % result)
