@@ -1,0 +1,11 @@
+openarena
+npb
+go-benchmark
+dacapobench
+hackbench
+rbenchmark
+#tensorflow
+pgbench
+mcperf
+git
+scikit-learn
