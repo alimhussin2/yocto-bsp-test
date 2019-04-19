@@ -28,8 +28,8 @@ for iface in $interfaces; do
     echo "[  INFO  ] Board boot up successfully. Board ipaddr is `bash $lava_show_ipaddr $iface`"
 done
 
-echo "[  INFO  ] Install netifaces"
-pip3 install --proxy=$http_proxy netifaces
+#echo "[  INFO  ] Install netifaces"
+#pip3 install --proxy=$http_proxy netifaces
 
 #echo "[  INFO  ] Install buildbot-worker"
 #pip3 install --proxy=$http_proxy buildbot-worker
