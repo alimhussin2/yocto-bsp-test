@@ -133,14 +133,13 @@ def get_base_dir():
 def auto_publish_results(results):
     ww_dir = create_archives_by_daily(None, True)
     base_dir = os.path.join(ww_dir, 'lava')
-    upload_dir = base_dir
     lava_dirs = get_lava_dir()
     for lava_dir in lava_dirs:
         phoronix_dir = 'phoronix-test-suite'
         suffix_path = get_boardinfo() + '/' + get_os()
-        upload_dir = os.path.join(upload_dir, lava_dir)
-        upload_dir = os.path.join(upload_dir, phoronix_dir)
-        upload_dir = os.path.join(upload_dir, suffix_path)
+        tmp_dir = os.path.join(base_dir, lava_dir)
+        tmp_dir = os.path.join(tmp_dir, phoronix_dir)
+        upload_dir = os.path.join(tmp_dir, suffix_path)
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     dest_dir = os.path.join(upload_dir, get_resultsfiles(results))
