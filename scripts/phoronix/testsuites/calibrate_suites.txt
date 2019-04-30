@@ -1,0 +1,6 @@
+compress-xz
+smallpt
+ramspeed
+openarena
+sockperf
+blogbench
