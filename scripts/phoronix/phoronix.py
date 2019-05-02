@@ -46,6 +46,8 @@ def get_os():
 
 def run_tests(tests_file):
     testsuites = ""
+    cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+    subprocess.run(cmd, shell=True)
     if os.path.abspath(tests_file):
         with open(tests_file, 'r') as list_tests:
             for test in list_tests:
