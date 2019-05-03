@@ -19,7 +19,8 @@ ffmpeg
 ffte
 fhourstones
 glibc-bench
-gnupg
+pts/gnupg
+system/gnupg
 gpu-residency
 hackbench
 himeno
