@@ -46,8 +46,6 @@ def get_os():
 
 def run_tests(tests_file):
     testsuites = ""
-    cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
-    subprocess.run(cmd, shell=True)
     if os.path.abspath(tests_file):
         with open(tests_file, 'r') as list_tests:
             for test in list_tests:
@@ -169,6 +167,7 @@ def register_arguments():
     parser.add_argument("--proxy-port", help="port number of proxy server")
     parser.add_argument("--convert-json", action="store_true", help="convert phoronix test results to json format")
     parser.add_argument("--nfs-mount", help="do nfs mount by providing argument as nfsserver, src, dest", nargs = '*')
+    parser.add_argument("--performance", help="set scaling_governor to performance instead of powersaver.", action="store_true")
     args = parser.parse_args()
     return args
 
@@ -185,6 +184,7 @@ if __name__ == "__main__":
     proxy_port = args.proxy_port
     convert_json = args.convert_json
     nfs_mount = args.nfs_mount
+    perf = args.performance
 
     check_pkg()
     #check phoronix configuration file
@@ -202,6 +202,10 @@ if __name__ == "__main__":
             #print("Info: proxy address %s, proxy port %s, installed_tests %s, cache_dir %s, results_dir %s"
             #        % (proxy_address, proxy_port, installed_tests, cache_dir, results_dir))
             configure_phoronix(proxy_address, proxy_port, installed_tests, cache_dir, results_dir)
+    if perf:
+        print("INFO: Set scaling_governor to performance")
+        cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+        subprocess.run(cmd, shell=True)
     if start_tests:
         run_tests(start_tests)
         if nfs_mount:
