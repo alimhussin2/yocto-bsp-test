@@ -12,6 +12,7 @@ import fnmatch
 import ntpath
 import xml.etree.ElementTree as ET
 import sys
+import shutil
 from os import environ
 from ptsxml2json import convert_xmltojson
 try:
@@ -43,7 +44,6 @@ def get_os():
         os_name.append(re.sub('[^a-zA-Z0-9.\-]+', '', i).replace('ID',''))
     return os_name[0] + '-' + os_name[1]
     
-
 def run_tests(tests_file):
     testsuites = ""
     if os.path.abspath(tests_file):
@@ -86,7 +86,6 @@ def get_resultsdir():
     latest_result = max(lresultsdir, key=os.path.getmtime)
     return latest_result
 
-
 def get_resultsfiles(resultsdir):
     head, lresultsdir = ntpath.split(resultsdir)     
     return lresultsdir
@@ -106,11 +105,54 @@ def convert_json():
             f.close()
         print("INFO: Saved result in %s" % results_json)
 
-def compare_results(current_results, results_dir):
-    if os.path.exists(results_dir):
-        subprocess.call(['phoronix-test-suite merge-results %s %s'] % (current_results, results_dir), shell=True)
-    else:
-        print("ERROR: Unable to compare results as % is not exists." % results_dir)
+def auto_compare_results(results_dir, machine1, machine2, os1, os2, upload_dir):
+    """
+    This function is meant to compare previous results from archives
+    by query by machines and OS then do the comparison.
+    """
+    list_results = []
+    if (machine1 == machine2) and (os1 == os2):
+        print("ERROR: Cannot compare same OS on same machine")
+        exit()
+    for r, d, f in os.walk(results_dir):
+        for file in f:
+            if '.xml' in file:
+                list_results.append(os.path.join(r, file))
+    results1 = query_results(list_results, machine1, os1)
+    results2 = query_results(list_results, machine2, os2)
+    print("INFO: Result1 %s" % results1)
+    print("INFO: Result2 %s" % results2)
+    tmp_results_dir = "/tmp/merge-results"
+    modify_config(tmp_results_dir)
+    t_results1 = get_resultsfiles(results1)
+    t_results2 = get_resultsfiles(results2)
+    shutil.copytree(results1, os.path.join(tmp_results_dir, t_results1))
+    shutil.copytree(results2, os.path.join(tmp_results_dir, t_results2))
+    cmd = "phoronix-test-suite merge-results %s %s" % (t_results1, t_results2)
+    subprocess.run(cmd, shell=True)
+    for m in os.listdir(tmp_results_dir):
+        if re.findall(r'merge-*', m):
+            shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m))
+            print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m)))
+    shutil.rmtree(tmp_results_dir)
+
+def query_results(list_results, machine, distro):
+    qr = []
+    for lr in list_results:
+        if re.findall(machine, lr):
+            if re.findall(distro, lr):
+                qr.append(lr)
+    latest_result = max(qr, key=os.path.getmtime).replace("/composite.xml", "")
+    return latest_result 
+
+def modify_config(tmp_results_dir):
+    phoronix_config = "/etc/phoronix-test-suite.xml"        
+    tree = ET.parse(phoronix_config)  
+    root = tree.getroot()                                                                                              
+    for item in root.iter('Testing'):                
+        item.find('ResultsDirectory').text = tmp_results_dir  
+    print("INFO: edited phoronix config to %s" % phoronix_config)
+    tree.write(phoronix_config)
 
 def publish_results(results, upload_server):
     os_name = get_os()
@@ -159,7 +201,8 @@ def register_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-storage", help="path to store test results")
     parser.add_argument("--installed-tests", help="path to store installed tests")
-    parser.add_argument("--compare-results", help="Compare results with others run or other platfrom", nargs = '*')
+    parser.add_argument("--compare-results", help="Compare results with others run or other platfrom.\
+                         [results_dir] [machine1] [machine2] [os1] [os2] [upload_dir]", nargs = '*')
     parser.add_argument("--run-tests", help="run phoronix test suite with predefined test suites")
     parser.add_argument("--upload-results", help="upload test results to artifactorial")
     parser.add_argument("--cache-directory", help="path to store cache files")
@@ -215,14 +258,14 @@ if __name__ == "__main__":
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
         auto_publish_results(get_resultsdir())
     if compare_results:
-        results1 = args.compare_results[0]
-        results2 = args.compare_results[1]
-        if all(var is None for var in [results1, results2]):
-            print("Error: To compare results, use --compare-results results1 results2")
-            exit()
-        else:
-            print("Comparing results %s with %s" % (results1, results2))
-            compare_results(results1, results2)
+        results_dir = args.compare_results[0]
+        machine1 = args.compare_results[1]
+        machine2 = args.compare_results[2]
+        os1 = args.compare_results[3]
+        os2 = args.compare_results[4]
+        upload_dir = args.compare_results[5]
+        print("INFO: Compare phoronix results")
+        auto_compare_results(results_dir, machine1, machine2, os1, os2, upload_dir)
     if upload_server:
         print("INFO: The test results will upload to server %s" % upload_server)
         publish_results(get_resultsdir(), upload_server)
