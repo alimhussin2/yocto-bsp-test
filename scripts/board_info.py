@@ -145,10 +145,10 @@ def create_lava_dir():
     lava_dir = os.path.join(ww_dir, 'lava')
     lava_id = get_lava_dir()
     for i in lava_id:
-        lava_dir = os.path.join(lava_dir, i)
-    if not os.path.exists(lava_dir):
-        os.makedirs(lava_dir)
-    return lava_dir
+        lava_path = os.path.join(lava_dir, i)
+        if not os.path.exists(lava_path):
+            os.makedirs(lava_path)
+    return lava_path
 
 if __name__ == "__main__":
     #nfsserver = sys.argv[1]
