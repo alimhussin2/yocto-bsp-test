@@ -106,7 +106,10 @@ def load_board_info(filename):
 
 def get_lava_job_id():
     list_dir = [f for f in os.listdir('/') if re.match(r'lava',f)]
-    return list_dir[0].replace("lava-", "")
+    lava_id = ''
+    for d in list_dir:
+        lava_id = d
+    return lava_id.replace("lava-", "")
 
 def copy_to(src, dest, filename):
     if not os.path.exists(dest):
