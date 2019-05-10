@@ -90,6 +90,48 @@ def get_resultsfiles(resultsdir):
     head, lresultsdir = ntpath.split(resultsdir)     
     return lresultsdir
 
+def get_dir(option):
+    """
+    File structure is like this
+    <base_dir>/<ww_dir>/<lava_dir>/<lava_id_dir>/<phoronix_dir>/<machine_dir>/<os_release_dir>/<pts_results_dir>
+    e.g. of full phoronix file structure
+    /srv/data/archives/2019/5/19/19.2/lava/lava-2236/phoronix-test-suite/NUC6i7KYB/poky-2.7-snapshot-20190424/2019-05-07-0633/
+    <base_dir> /srv/data
+    <ww_dir> /srv/data/2019/5/19/19.2
+    <lava_dir> /srv/data/2019/5/19/19.2/lava
+    <lava_id_dr> /srv/data/2019/5/19/19.2/lava/lava-2236
+    <phoronix_dir> /srv/data/2019/5/19/19.2/lava/lava-2236/phoronix-test-suite
+    <machine_dir> /srv/data/2019/5/19/19.2/lava/lava-2236/phoronix-test-suite/NUC6i7KYB
+    <os_release_dir> /srv/data/2019/5/19/19.2/lava/lava-2236/phoronix-test-suite/NUC6i7KYB/poky-2.7-snapshot-20190424
+
+    """
+    lava_dir = ""
+    lava_id = ""
+    for d in get_lava_dir():
+        lava_id = d
+    base_dir = "/srv/data/archives"
+    for r, d, f in os.walk(base_dir):
+        for ww in d:
+            if re.findall(lava_id, ww):
+                lava_dir = r
+    ww_dir = lava_dir.replace('/lava', '')
+    lava_id_dir = os.path.join(lava_dir, lava_id)
+    phoronix_dir = os.path.join(lava_id_dir, 'phoronix-test-suite')
+    machine_dir = os.path.join(phoronix_dir, get_boardinfo())
+    os_release_dir = os.path.join(machine_dir, get_os())
+    if option == "ww_dir":
+        return ww_dir
+    if option == "lava_dir":
+        return lava_dir
+    if option == "lava_id_dir":
+        return lava_id_dir
+    if option == "phoronix_dir":
+        return phoronix_dir
+    if option == "machine_dir":
+        return machine_dir
+    if option == "os_release_dir":
+        return os_release_dir
+
 def convert_json():
     cmd = 'phoronix-test-suite show-result'
     output = subprocess.check_output(cmd, shell=True)
@@ -164,24 +206,7 @@ def publish_results(results, upload_server):
     output = subprocess.check_output(cmd, shell=True).decode()
     print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(results)))
 
-def get_base_dir():
-    ww_dir = create_archives_by_daily(None, True)
-    base_dir = os.path.join(ww_dir, 'lava')
-    lava_dirs = get_lava_dir()
-    for lava_dir in lava_dirs:
-        base_dir = os.path.join(base_dir, lava_dir)
-    return base_dir
-
-def auto_publish_results(results):
-    ww_dir = create_archives_by_daily(None, True)
-    base_dir = os.path.join(ww_dir, 'lava')
-    lava_dirs = get_lava_dir()
-    for lava_dir in lava_dirs:
-        phoronix_dir = 'phoronix-test-suite'
-        suffix_path = get_boardinfo() + '/' + get_os()
-        tmp_dir = os.path.join(base_dir, lava_dir)
-        tmp_dir = os.path.join(tmp_dir, phoronix_dir)
-        upload_dir = os.path.join(tmp_dir, suffix_path)
+def auto_publish_results(results, upload_dir):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     dest_dir = os.path.join(upload_dir, get_resultsfiles(results))
@@ -189,13 +214,12 @@ def auto_publish_results(results):
     subprocess.check_output(cmd, shell=True).decode()
     print('INFO: Successfully upload to %s' % dest_dir)
     data = {"phoronixResults" : dest_dir}
-    for lava_dir in lava_dirs:
-        b_info = os.path.join(base_dir, lava_dir) + '/board_info.json'
-        if os.path.isfile(b_info):
-            print('INFO: Successfully updated %s' % b_info)
-            update_board_info(os.path.join(base_dir, lava_dir), data)
-        else:
-            print('ERROR: Unable to update %s. File is missing.' % b_info)
+    b_info = os.path.join(get_dir("lava_id_dir"), 'board_info.json')
+    if os.path.isfile(b_info):
+        update_board_info(get_dir("lava_id_dir"), data)
+        print('INFO: Successfully updated %s' % b_info)
+    else:
+        print('ERROR: Unable to update %s. File is missing.' % b_info)
 
 def register_arguments():
     parser = argparse.ArgumentParser()
@@ -250,13 +274,14 @@ if __name__ == "__main__":
         cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         subprocess.run(cmd, shell=True)
     if start_tests:
+        upload_dir = get_dir("os_release_dir")
         run_tests(start_tests)
         if nfs_mount:
             nfs_server = args.nfs_mount[0]
             nfs_src = args.nfs_mount[1]
             nfs_dest = args.nfs_mount[2]
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
-        auto_publish_results(get_resultsdir())
+        auto_publish_results(get_resultsdir(), upload_dir)
     if compare_results:
         results_dir = args.compare_results[0]
         machine1 = args.compare_results[1]
