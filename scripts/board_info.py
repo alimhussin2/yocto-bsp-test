@@ -105,11 +105,19 @@ def load_board_info(filename):
         print('ipaddr: %s' % data['network']['ipaddr'])
 
 def get_lava_job_id():
+    """
+    To get lava job id, we check /lava-*. Sometimes there are lot
+    of /lava-*. So need to find the latest /lava-* as current lava
+    job id.
+    """
+    lava_id = []
     list_dir = [f for f in os.listdir('/') if re.match(r'lava',f)]
-    lava_id = ''
     for d in list_dir:
-        lava_id = d
-    return lava_id.replace("lava-", "")
+        print('[DEBUG] lava id: %s' % d)
+        lava_id.append(os.path.join('/', d))
+    cur_lava_id = max(lava_id, os.path.getmtime).replace('/lava-', '')
+    print('[DEBUG] Current lava id: %s' % cur_lava_id)
+    return cur_lava_id
 
 def copy_to(src, dest, filename):
     if not os.path.exists(dest):
