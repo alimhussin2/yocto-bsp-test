@@ -1,6 +1,5 @@
 aobench
 asmfish
-blender
 botan
 build-gcc
 build-linux-kernel
@@ -48,7 +47,6 @@ git
 mcperf
 nginx
 osbench
-pgbench
 php
 phpbench
 redis
