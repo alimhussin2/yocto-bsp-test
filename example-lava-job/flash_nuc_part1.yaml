@@ -1,0 +1,68 @@
+device_type: skylake
+job_name: Flash NUC with SSH (Part 1)
+timeouts:
+  job:
+    hours: 2
+  action:
+    hours: 2
+  connection:
+    hours: 2
+priority: medium
+visibility: public
+actions:
+- deploy:
+    method: ssh
+    to: ssh
+    os: oe
+    flags: flash
+- boot:
+    timeout:
+      minutes: 10
+    method: ssh
+    #auto_login: { login_prompt: 'intel-corei7-64 login:', username: root }
+    prompts:
+      - 'root@intel-corei7-64-64:~#'
+    transfer_overlay:
+      download_command: wget
+      unpack_command: tar -C / -xvpf
+- test:
+    timeout:
+      minutes: 10
+    name: sanity-test
+    definitions:
+    - repository: https://github.com/alimhussin2/yocto-bsp-test.git
+      from: git
+      path: scripts/sanity_test/sanity_test.yaml
+      name: sanity-test
+- deploy:
+    timeout:
+      hours: 2
+    to: sata
+    image:
+      url: 
+      root_partition: 2
+    device: 'boot'
+    download:
+      tool: '/usr/bin/wget'
+      prompt: 'HTTP request sent, awaiting response...'
+      options: '--connect-timeout=30 -S --progress=dot:giga -O - {DOWNLOAD_URL}'
+    os: oe
+- boot:
+    timeout:
+      minutes: 10
+    method: ssh
+    #auto_login: { login_prompt: 'intel-corei7-64 login:', username: root }
+    prompts:
+      - 'root@intel-corei7-64-64:~#'
+    transfer_overlay:
+      download_command: wget
+      unpack_command: tar -C / -xvpf
+- test:
+    timeout:
+      minutes: 10
+    name: sanity-test1
+    definitions:
+    - repository: https://github.com/alimhussin2/yocto-bsp-test.git
+      from: git
+      path: scripts/sanity_test/sanity_test.yaml
+      name: sanity-test1 

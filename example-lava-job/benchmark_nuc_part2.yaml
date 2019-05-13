@@ -1,0 +1,47 @@
+device_type: skylake
+job_name: Benchmark YP on NUC with SSH (Part 2)
+timeouts:
+  job:
+    hours: 2
+  action:
+    hours: 2
+  connection:
+    hours: 2
+priority: medium
+visibility: public
+actions:
+- deploy:
+    method: ssh
+    to: ssh
+    os: oe
+    flags: noflash
+- boot:
+    timeout:
+      minutes: 10
+    method: ssh
+    #auto_login: { login_prompt: 'intel-corei7-64 login:', username: root }
+    prompts:
+      - 'root@intel-corei7-64-64:~#'
+    transfer_overlay:
+      download_command: wget
+      unpack_command: tar -C / -xvpf
+- test:
+    timeout:
+      hours: 1
+    name: phoronix
+    definitions:
+    - repository: https://github.com/alimhussin2/yocto-bsp-test.git
+      from: git
+      parameters:
+          PROXY_SERVER: ""
+          PROXY_PORT : ""
+          INSTALLED_TESTS_DIR : "/phoronix-test-suite/installed-tests"
+          DL_CACHE_DIR : "/phoronix-test-suite/download-cache"
+          RESULTS_DIR : "/phoronix-test-suite/test-results"
+          TESTSUITES : "testsuites/simple_suites.txt"
+          UPLOAD_DIR : "/phoronix-test-suite/test-results/machines"
+          NFS_SERVER : ""
+          NFS_SRC : "/nfs"
+          NFS_DEST : "/nfs"
+      path: scripts/phoronix/phoronix.yaml
+      name: phoronix 
