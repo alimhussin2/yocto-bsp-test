@@ -298,6 +298,6 @@ if __name__ == "__main__":
         print("INFO: Convert phoronix test results to json format")
         raw_result = os.path.join(get_resultsdir(), 'composite.xml')
         if os.path.isfile(raw_result):
-            convert_xmltojson(raw_result, get_base_dir())
+            convert_xmltojson(raw_result, get_dir("lava_id_dir"))
         else:
             print('ERROR: %s is not exist!' % result)
