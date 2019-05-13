@@ -115,7 +115,7 @@ def get_lava_job_id():
     for d in list_dir:
         print('[DEBUG] lava id: %s' % d)
         lava_id.append(os.path.join('/', d))
-    cur_lava_id = max(lava_id, os.path.getmtime).replace('/lava-', '')
+    cur_lava_id = max(lava_id, key=os.path.getmtime).replace('/lava-', '')
     print('[DEBUG] Current lava id: %s' % cur_lava_id)
     return cur_lava_id
 
