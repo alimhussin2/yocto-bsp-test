@@ -154,11 +154,10 @@ def update_board_info(path_board_info, data):
 def create_lava_dir():
     ww_dir = create_archives_by_daily(None, True)
     lava_dir = os.path.join(ww_dir, 'lava')
-    lava_id = get_lava_dir()
-    for i in lava_id:
-        lava_path = os.path.join(lava_dir, i)
-        if not os.path.exists(lava_path):
-            os.makedirs(lava_path)
+    lava_id = get_lava_job_id()
+    lava_path = os.path.join(lava_dir, lava_id)
+    if not os.path.exists(lava_path):
+        os.makedirs(lava_path)
     return lava_path
 
 if __name__ == "__main__":
