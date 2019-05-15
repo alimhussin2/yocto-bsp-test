@@ -108,6 +108,7 @@ def get_dir(option):
     lava_dir = ""
     lava_id = ""
     lava_idx = []
+    count = 0
     for d in get_lava_dir():
         lava_idx.append(os.path.join('/', d))
     lava_id = max(lava_idx, key=os.path.getmtime).replace('/', '')
@@ -116,7 +117,12 @@ def get_dir(option):
         for ww in d:
             if re.findall(lava_id, ww):
                 lava_dir = r
-    ww_dir = lava_dir.replace('/lava', '')
+                ww_dir =lava_dir.replace('/lava', '')
+            else:
+                count += 1
+        if count == len(d):
+            ww_dir = create_archives_by_daily(None, True)
+            lava_dir = os.path.join(ww_dir, 'lava')
     lava_id_dir = os.path.join(lava_dir, lava_id)
     phoronix_dir = os.path.join(lava_id_dir, 'phoronix-test-suite')
     machine_dir = os.path.join(phoronix_dir, get_boardinfo())
