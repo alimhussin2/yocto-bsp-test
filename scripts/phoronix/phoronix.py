@@ -107,8 +107,10 @@ def get_dir(option):
     """
     lava_dir = ""
     lava_id = ""
+    lava_idx = []
     for d in get_lava_dir():
-        lava_id = d
+        lava_idx.append(os.path.join('/', d))
+    lava_id = max(lava_idx, key=os.path.getmtime).replace('/', '')
     base_dir = "/srv/data/archives"
     for r, d, f in os.walk(base_dir):
         for ww in d:
