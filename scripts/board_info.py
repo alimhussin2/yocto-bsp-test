@@ -115,8 +115,8 @@ def get_lava_job_id():
     for d in list_dir:
         print('[DEBUG] lava id: %s' % d)
         lava_id.append(os.path.join('/', d))
-    cur_lava_id = max(lava_id, key=os.path.getmtime)
-    print('[DEBUG] Current lava id: %s' % cur_lava_id.replace('/lava-', ''))
+    cur_lava_id = max(lava_id, key=os.path.getmtime).replace('/lava-', '')
+    print('[DEBUG] Current lava id: %s' % cur_lava_id)
     return cur_lava_id
 
 def copy_to(src, dest, filename):
@@ -155,7 +155,7 @@ def create_lava_dir():
     ww_dir = create_archives_by_daily(None, True)
     lava_dir = os.path.join(ww_dir, 'lava')
     lava_id = get_lava_job_id()
-    lava_path = os.path.join(lava_dir, lava_id)
+    lava_path = os.path.join(lava_dir, 'lava-' + lava_id)
     if not os.path.exists(lava_path):
         os.makedirs(lava_path)
     return lava_path
