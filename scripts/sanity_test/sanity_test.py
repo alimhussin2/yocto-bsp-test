@@ -42,7 +42,7 @@ def get_lava_job_id():
 
 if __name__ == '__main__':
     resultFile = 'result_sanity_test.json'
-    path = '/srv/data/LAVA/'
+    path = '/srv/data/LAVA/lava-job'
     kernel = checkKernel()
     dmesg = checkDmesg()
     data = { "kernel" : kernel,
