@@ -214,10 +214,12 @@ def publish_results(results, upload_server):
     output = subprocess.check_output(cmd, shell=True).decode()
     print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(results)))
 
-def auto_publish_results(results, upload_dir):
+def auto_publish_results(results, upload_dir, id):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     dest_dir = os.path.join(upload_dir, get_resultsfiles(results))
+    if id is not None:
+        set_identifier(results, id)
     cmd = 'cp -r %s %s' % (results, upload_dir)
     subprocess.check_output(cmd, shell=True).decode()
     print('INFO: Successfully upload to %s' % dest_dir)
@@ -228,6 +230,20 @@ def auto_publish_results(results, upload_dir):
         print('INFO: Successfully updated %s' % b_info)
     else:
         print('ERROR: Unable to update %s. File is missing.' % b_info)
+
+def set_identifier(phoronixResult, newid):
+    currentResult = get_resultsfiles(phoronixResult)
+    phoronixResult = os.path.join(phoronixResult, 'composite.xml')
+    tree = ET.parse(phoronixResult)
+    root = tree.getroot()
+    for n in root.iter('System'):
+        n.find('Identifier').text = newid
+    for n in root.iter('Entry'):
+        n.find('Identifier').text = newid
+    print("INFO: Set new identifier on Phoronix result as %s" % newid)
+    tree.write(phoronixResult)
+    cmd = 'phoronix-test-suite refresh-graphs %s' % currentResult
+    subprocess.run(cmd, shell=True)
 
 def register_arguments():
     parser = argparse.ArgumentParser()
@@ -243,6 +259,7 @@ def register_arguments():
     parser.add_argument("--convert-json", action="store_true", help="convert phoronix test results to json format")
     parser.add_argument("--nfs-mount", help="do nfs mount by providing argument as nfsserver, src, dest", nargs = '*')
     parser.add_argument("--performance", help="set scaling_governor to performance instead of powersaver.", action="store_true")
+    parser.add_argument("--id", help="set phoronix identifier such as OS name on phoronix result")
     args = parser.parse_args()
     return args
 
@@ -260,6 +277,7 @@ if __name__ == "__main__":
     convert_json = args.convert_json
     nfs_mount = args.nfs_mount
     perf = args.performance
+    id = args.id
 
     check_pkg()
     #check phoronix configuration file
@@ -282,14 +300,18 @@ if __name__ == "__main__":
         cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         subprocess.run(cmd, shell=True)
     if start_tests:
-        upload_dir = get_dir("os_release_dir")
+        if not id:
+            upload_dir = get_dir("os_release_dir")
+        else:
+            upload_dir = get_dir("machine_dir")
+            upload_dir = os.path.join(upload_dir, id)
         run_tests(start_tests)
         if nfs_mount:
             nfs_server = args.nfs_mount[0]
             nfs_src = args.nfs_mount[1]
             nfs_dest = args.nfs_mount[2]
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
-        auto_publish_results(get_resultsdir(), upload_dir)
+        auto_publish_results(get_resultsdir(), upload_dir, id)
     if compare_results:
         results_dir = args.compare_results[0]
         machine1 = args.compare_results[1]
