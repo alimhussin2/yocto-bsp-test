@@ -155,35 +155,39 @@ def convert_json():
             f.close()
         print("INFO: Saved result in %s" % results_json)
 
-def auto_compare_results(results_dir, machine1, machine2, os1, os2, upload_dir):
+def auto_compare_results(results_dir, upload_dir, machine, *args):
     """
     This function is meant to compare previous results from archives
     by query by machines and OS then do the comparison.
     """
     list_results = []
-    if (machine1 == machine2) and (os1 == os2):
-        print("ERROR: Cannot compare same OS on same machine")
-        exit()
+    qry_results = []
+    current_results = []
+    tmp_results_dir = "/tmp/merge-results"
+    dest_symlink = os.path.join(upload_dir, "LATEST")
+    modify_config(tmp_results_dir)
     for r, d, f in os.walk(results_dir):
         for file in f:
             if '.xml' in file:
                 list_results.append(os.path.join(r, file))
-    results1 = query_results(list_results, machine1, os1)
-    results2 = query_results(list_results, machine2, os2)
-    print("INFO: Result1 %s" % results1)
-    print("INFO: Result2 %s" % results2)
-    tmp_results_dir = "/tmp/merge-results"
-    modify_config(tmp_results_dir)
-    t_results1 = get_resultsfiles(results1)
-    t_results2 = get_resultsfiles(results2)
-    shutil.copytree(results1, os.path.join(tmp_results_dir, t_results1))
-    shutil.copytree(results2, os.path.join(tmp_results_dir, t_results2))
-    cmd = "phoronix-test-suite merge-results %s %s" % (t_results1, t_results2)
+    for arg in args:
+        qr = query_results(list_results, machine, arg)
+        if qr is not None:
+            qry_results.append(qr)
+            current_results.append(get_resultsfiles(qr))
+            print("INFO: Result %s" % qr)
+    for qr in qry_results:
+        shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr)))
+    cmd = "phoronix-test-suite merge-results %s" % ' '.join(current_results)
     subprocess.run(cmd, shell=True)
     for m in os.listdir(tmp_results_dir):
         if re.findall(r'merge-*', m):
             shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m))
             print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m)))
+            if os.path.islink(dest_symlink):
+                os.unlink(dest_symlink)
+            os.symlink(os.path.join(upload_dir, m), dest_symlink)
+            print("INFO: Symlink %s" % dest_symlink)
     shutil.rmtree(tmp_results_dir)
 
 def query_results(list_results, machine, distro):
@@ -192,7 +196,13 @@ def query_results(list_results, machine, distro):
         if re.findall(machine, lr):
             if re.findall(distro, lr):
                 qr.append(lr)
-    latest_result = max(qr, key=os.path.getmtime).replace("/composite.xml", "")
+        else:
+            print('ERROR: machine %s is not found!' % machine)
+            exit()
+    if len(qr) > 0:
+        latest_result = max(qr, key=os.path.getmtime).replace("/composite.xml", "")
+    else:
+        latest_result = None
     return latest_result 
 
 def modify_config(tmp_results_dir):
@@ -314,13 +324,11 @@ if __name__ == "__main__":
         auto_publish_results(get_resultsdir(), upload_dir, id)
     if compare_results:
         results_dir = args.compare_results[0]
-        machine1 = args.compare_results[1]
-        machine2 = args.compare_results[2]
-        os1 = args.compare_results[3]
-        os2 = args.compare_results[4]
-        upload_dir = args.compare_results[5]
+        upload_dir = args.compare_results[1]
+        machine = args.compare_results[2]
+        args = args.compare_results[3:]
         print("INFO: Compare phoronix results")
-        auto_compare_results(results_dir, machine1, machine2, os1, os2, upload_dir)
+        auto_compare_results(results_dir, upload_dir, machine, *args)
     if upload_server:
         print("INFO: The test results will upload to server %s" % upload_server)
         publish_results(get_resultsdir(), upload_server)
