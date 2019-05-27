@@ -260,7 +260,7 @@ def register_arguments():
     parser.add_argument("--results-storage", help="path to store test results")
     parser.add_argument("--installed-tests", help="path to store installed tests")
     parser.add_argument("--compare-results", help="Compare results with others run or other platfrom.\
-                         [results_dir] [machine1] [machine2] [os1] [os2] [upload_dir]", nargs = '*')
+                         [results_dir] [upload_dir] [machine] [os1|os2|os3]", nargs = '*')
     parser.add_argument("--run-tests", help="run phoronix test suite with predefined test suites")
     parser.add_argument("--upload-results", help="upload test results to artifactorial")
     parser.add_argument("--cache-directory", help="path to store cache files")
