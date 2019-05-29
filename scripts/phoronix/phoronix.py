@@ -255,6 +255,19 @@ def set_identifier(phoronixResult, newid):
     cmd = 'phoronix-test-suite refresh-graphs %s' % currentResult
     subprocess.run(cmd, shell=True)
 
+def prepare_environment(installed_test_dir, nfs_server, nfs_src, nfs_dest):
+    """
+    Copy phoronix cache files from NFS server to target device.
+    """
+    print("INFO: Prepare Phoronix cache files")
+    if not os.path.exists(installed_test_dir):
+        os.makedirs(installed_test_dir)
+    do_mountnfs(nfs_server, nfs_src, nfs_dest)
+    phoronix_cache_dir = os.path.join(nfs_src, "archives/phoronix-test-suite/installed-tests")
+    cmd = 'cp -r %s %s' % (phoronix_cache_dir, installed_test_dir)
+    subprocess.run(cmd, shell=True)
+    print("INFO: Completed copy phoronix cache files")
+
 def register_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-storage", help="path to store test results")
@@ -270,6 +283,7 @@ def register_arguments():
     parser.add_argument("--nfs-mount", help="do nfs mount by providing argument as nfsserver, src, dest", nargs = '*')
     parser.add_argument("--performance", help="set scaling_governor to performance instead of powersaver.", action="store_true")
     parser.add_argument("--id", help="set phoronix identifier such as OS name on phoronix result")
+    parser.add_argument("--prepare-env", help="Copy Phoronix cache files form NFS server to target device.", action="store_true")
     args = parser.parse_args()
     return args
 
@@ -287,6 +301,7 @@ if __name__ == "__main__":
     convert_json = args.convert_json
     nfs_mount = args.nfs_mount
     perf = args.performance
+    prepare_env = args.prepare_env
     id = args.id
 
     check_pkg()
@@ -309,6 +324,12 @@ if __name__ == "__main__":
         print("INFO: Set scaling_governor to performance")
         cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         subprocess.run(cmd, shell=True)
+    if prepare_env:
+        if nfs_mount:
+            nfs_server = args.nfs_mount[0]
+            nfs_src = args.nfs_mount[1]
+            nfs_dest = args.nfs_mount[2]
+        prepare_environment(installed_test_dir, nfs_server, nfs_src, nfs_dest)
     if start_tests:
         if not id:
             upload_dir = get_dir("os_release_dir")
