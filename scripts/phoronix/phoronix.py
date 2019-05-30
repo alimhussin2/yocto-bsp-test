@@ -180,6 +180,8 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
         shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr)))
     cmd = "phoronix-test-suite merge-results %s" % ' '.join(current_results)
     subprocess.run(cmd, shell=True)
+    if not os.path.exist(upload_dir):
+        os.makedirs(upload_dir)
     for m in os.listdir(tmp_results_dir):
         if re.findall(r'merge-*', m):
             shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m))
