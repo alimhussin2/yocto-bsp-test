@@ -9,6 +9,7 @@ metadata:
         - oe
     devices:
         - minnowboard
+        - NUC6
     scope:
         - functional
     environment:
@@ -26,6 +27,10 @@ params:
         NFS_DEST : ""
         ID : ""
         PHORONIX_CACHE_DIR : ""
+        PHORONIX_ARCHIVE_RESULTS_DIR : ""
+        PHORONIX_MERGE_RESULTS_DIR : ""
+        DEVICE : ""
+        DISTROS_LIST : ""
 run:
     steps:
         - ls -l
@@ -36,6 +41,7 @@ run:
         - python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR} --run-tests ${TESTSUITES} --id ${ID} --prepare-env ${PHORONIX_CACHE_DIR} --nfs-mount ${NFS_SERVER} ${NFS_SRC} ${NFS_DEST}
         - python3 phoronix.py --upload-results ${UPLOAD_DIR}
         - python3 phoronix.py --convert-json
+        - python3 phoronix.py --compare-results ${PHORONIX_ARCHIVE_RESULTS_DIR} ${PHORONIX_MERGE_RESULTS_DIR} ${DEVICE} ${DISTROS_LIST}
 
         
 parse:
