@@ -155,7 +155,7 @@ def convert_json():
             f.close()
         print("INFO: Saved result in %s" % results_json)
 
-def auto_compare_results(results_dir, upload_dir, machine, *args):
+def auto_compare_results(results_dir, upload_dir, machine, *distros):
     """
     This function is meant to compare previous results from archives
     by query by machines and OS then do the comparison.
@@ -170,8 +170,8 @@ def auto_compare_results(results_dir, upload_dir, machine, *args):
         for file in f:
             if '.xml' in file:
                 list_results.append(os.path.join(r, file))
-    for arg in args:
-        qr = query_results(list_results, machine, arg)
+    for distro in distros:
+        qr = query_results(list_results, machine, distro)
         if qr is not None:
             qry_results.append(qr)
             current_results.append(get_resultsfiles(qr))
@@ -196,9 +196,6 @@ def query_results(list_results, machine, distro):
         if re.findall(machine, lr):
             if re.findall(distro, lr):
                 qr.append(lr)
-        else:
-            print('ERROR: machine %s is not found!' % machine)
-            exit()
     if len(qr) > 0:
         latest_result = max(qr, key=os.path.getmtime).replace("/composite.xml", "")
     else:
@@ -347,9 +344,9 @@ if __name__ == "__main__":
         results_dir = args.compare_results[0]
         upload_dir = args.compare_results[1]
         machine = args.compare_results[2]
-        args = args.compare_results[3:]
+        distros = args.compare_results[3:]
         print("INFO: Compare phoronix results")
-        auto_compare_results(results_dir, upload_dir, machine, *args)
+        auto_compare_results(results_dir, upload_dir, machine, *distros)
     if upload_server:
         print("INFO: The test results will upload to server %s" % upload_server)
         publish_results(get_resultsdir(), upload_server)
