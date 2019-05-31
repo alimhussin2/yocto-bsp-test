@@ -258,10 +258,10 @@ def prepare_environment(installed_test_dir, phoronix_cache_dir, nfs_server, nfs_
     """
     Copy phoronix cache files from NFS server to target device.
     """
-    print("INFO: Prepare Phoronix cache files")
     if not os.path.exists(installed_test_dir):
         os.makedirs(installed_test_dir)
     do_mountnfs(nfs_server, nfs_src, nfs_dest)
+    print("INFO: Prepare Phoronix cache files...")
     phoronix_cache_dir = os.path.join(nfs_src, phoronix_cache_dir)
     cmd = 'cp -r %s %s' % (phoronix_cache_dir, installed_test_dir)
     subprocess.run(cmd, shell=True)
