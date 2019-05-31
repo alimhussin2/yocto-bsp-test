@@ -25,11 +25,12 @@ try:
 except Exception as e:
     print('ERROR: %s in %s' % (e, utilsdir))
 
-def check_pkg():
-    output = subprocess.run(['which', 'phoronix-test-suite'])
+def check_package(package):
+    cmd = 'which %s' % package
+    output = subprocess.run(cmd, shell=True)
     if output.returncode == 1:
-        print("ERROR: phoronix-test-suite not install")
-        exit()
+        print("ERROR: %s is not install in the system!" % package)
+    return output.returncode
 
 def get_boardinfo():
     with open('/sys/class/dmi/id/board_name', 'r') as f:
@@ -263,7 +264,10 @@ def prepare_environment(installed_test_dir, phoronix_cache_dir, nfs_server, nfs_
     do_mountnfs(nfs_server, nfs_src, nfs_dest)
     print("INFO: Prepare Phoronix cache files...")
     phoronix_cache_dir = os.path.join(nfs_src, phoronix_cache_dir)
-    cmd = 'cp -r %s %s' % (phoronix_cache_dir, installed_test_dir)
+    if check_package('rsync') == 0:
+        cmd = 'rsync -au --ignore-existing --info=progress2 %s %s' % (phoronix_cache_dir, ntpath.split(installed_test_dir)[0])
+    else:
+        cmd = 'cp -r %s %s' % (phoronix_cache_dir, installed_test_dir)
     subprocess.run(cmd, shell=True)
     print("INFO: Completed copy phoronix cache files")
 
@@ -303,7 +307,8 @@ if __name__ == "__main__":
     phoronix_cache = args.prepare_env
     id = args.id
 
-    check_pkg()
+    if check_package('phoronix-test-suite') == 1:
+        exit()
     #check phoronix configuration file
     if not os.path.isfile(os.path.join("/etc","phoronix-test-suite.xml")):
         print("Warning: Phoronix configuration file is not exist!\n"
