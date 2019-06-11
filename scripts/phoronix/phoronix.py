@@ -214,9 +214,8 @@ def modify_config(tmp_results_dir):
     print("INFO: edited phoronix config to %s" % phoronix_config)
     tree.write(phoronix_config)
 
-def publish_results(results, upload_server):
-    os_name = get_os()
-    suffix_path = get_boardinfo() + '/' + os_name
+def publish_results(results, upload_server, image_id):
+    suffix_path = get_boardinfo() + '/' + image_id
     upload_server = os.path.join(upload_server, suffix_path)
     if not os.path.exists(upload_server):
         os.mkdir(upload_server)
@@ -305,7 +304,7 @@ if __name__ == "__main__":
     nfs_mount = args.nfs_mount
     perf = args.performance
     phoronix_cache = args.prepare_env
-    id = args.id
+    image_id = args.id
 
     if check_package('phoronix-test-suite') == 1:
         exit()
@@ -335,18 +334,18 @@ if __name__ == "__main__":
             nfs_dest = args.nfs_mount[2]
         prepare_environment(installed_tests, phoronix_cache, nfs_server, nfs_src, nfs_dest)
     if start_tests:
-        if not id:
+        if not image_id:
             upload_dir = get_dir("os_release_dir")
         else:
             upload_dir = get_dir("machine_dir")
-            upload_dir = os.path.join(upload_dir, id)
+            upload_dir = os.path.join(upload_dir, image_id)
         run_tests(start_tests)
         if nfs_mount:
             nfs_server = args.nfs_mount[0]
             nfs_src = args.nfs_mount[1]
             nfs_dest = args.nfs_mount[2]
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
-        auto_publish_results(get_resultsdir(), upload_dir, id)
+        auto_publish_results(get_resultsdir(), upload_dir, image_id)
     if compare_results:
         results_dir = args.compare_results[0]
         upload_dir = args.compare_results[1]
@@ -356,7 +355,9 @@ if __name__ == "__main__":
         auto_compare_results(results_dir, upload_dir, machine, *distros)
     if upload_server:
         print("INFO: The test results will upload to server %s" % upload_server)
-        publish_results(get_resultsdir(), upload_server)
+        if not image_id:
+            image_id = get_os()
+        publish_results(get_resultsdir(), upload_server, image_id)
     if convert_json:
         print("INFO: Convert phoronix test results to json format")
         raw_result = os.path.join(get_resultsdir(), 'composite.xml')
