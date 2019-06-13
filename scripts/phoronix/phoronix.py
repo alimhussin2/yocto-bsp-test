@@ -13,6 +13,7 @@ import ntpath
 import xml.etree.ElementTree as ET
 import sys
 import shutil
+import time
 from os import environ
 from ptsxml2json import convert_xmltojson
 try:
@@ -177,15 +178,18 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
             qry_results.append(qr)
             current_results.append(get_resultsfiles(qr))
             print("INFO: Result %s" % qr)
-    for qr in qry_results:
-        shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr)))
+    if len(qry_results) < 2:
+        print('ERROR: Phoronix results not found or not enough to merge for this week. Merge result abort!')
+        exit()
+    else:
+         for qr in qry_results:
+            shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr))
     cmd = "phoronix-test-suite merge-results %s" % ' '.join(current_results)
     subprocess.run(cmd, shell=True)
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     for m in os.listdir(tmp_results_dir):
         if re.findall(r'merge-*', m):
-            # TODO: Rename merge-* to merge-<YYYY-mm-dd-HHMM>
             timestamp = datetime.now().strftime('%Y-%m-%d-%H%M')
             mergeFolder = 'merge-' + timestamp
             shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder))
@@ -197,15 +201,22 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
     shutil.rmtree(tmp_results_dir)
 
 def query_results(list_results, machine, distro):
+    current_ww = int(datetime.today().strftime("%U"))+1
+    list_weekly_results = []
     qr = []
+    latest_result = None
     for lr in list_results:
         if re.findall(machine, lr):
             if re.findall(distro, lr):
                 qr.append(lr)
-    if len(qr) > 0:
-        latest_result = max(qr, key=os.path.getmtime).replace("/composite.xml", "")
-    else:
-        latest_result = None
+    if len(qr) > 1:
+        for rawResult in qr:
+            epocTime = os.path.getmtime(rawResult)
+            result_ww = int(time.strftime('%U', time.localtime(epocTime)))+1
+            if current_ww == result_ww:
+                list_weekly_results.append(rawResult)
+        if len(list_weekly_results) > 0:
+            latest_result = max(list_weekly_results, key=os.path.getmtime).replace("/composite.xml", "")
     return latest_result 
 
 def modify_config(tmp_results_dir):
