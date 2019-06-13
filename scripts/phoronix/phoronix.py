@@ -185,11 +185,14 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
         os.makedirs(upload_dir)
     for m in os.listdir(tmp_results_dir):
         if re.findall(r'merge-*', m):
-            shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m))
-            print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, m)))
+            # TODO: Rename merge-* to merge-<YYYY-mm-dd-HHMM>
+            timestamp = datetime.now().strftime('%Y-%m-%d-%H%M')
+            mergeFolder = 'merge-' + timestamp
+            shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder))
+            print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder)))
             if os.path.islink(dest_symlink):
                 os.unlink(dest_symlink)
-            os.symlink(os.path.join(upload_dir, m), dest_symlink)
+            os.symlink(os.path.join(upload_dir, mergeFolder), dest_symlink)
             print("INFO: Symlink %s" % dest_symlink)
     shutil.rmtree(tmp_results_dir)
 
