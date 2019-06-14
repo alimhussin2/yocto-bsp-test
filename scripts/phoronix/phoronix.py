@@ -183,7 +183,7 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
         exit()
     else:
          for qr in qry_results:
-            shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr))
+            shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr)))
     cmd = "phoronix-test-suite merge-results %s" % ' '.join(current_results)
     subprocess.run(cmd, shell=True)
     if not os.path.exists(upload_dir):
