@@ -92,6 +92,14 @@ def get_resultsfiles(resultsdir):
     head, lresultsdir = ntpath.split(resultsdir)     
     return lresultsdir
 
+def get_installed_dir():
+    tree = ET.parse('/etc/phoronix-test-suite.xml')
+    root = tree.getroot()
+    installed_dir = None
+    for n in root.iter('Installation'):
+        installed_dir = n.find('EnvironmentDirectory').text
+    return installed_dir
+
 def get_dir(option):
     """
     File structure is like this
