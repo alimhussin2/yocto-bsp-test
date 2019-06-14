@@ -292,6 +292,23 @@ def prepare_environment(installed_test_dir, phoronix_cache_dir, nfs_server, nfs_
     subprocess.run(cmd, shell=True)
     print("INFO: Completed copy phoronix cache files")
 
+def get_phoronix_logs(upload_dir, installed_dir):
+    list_logs = []
+    for r, d, f in os.walk(installed_dir):
+        for file in f:
+            if '.log' in file:
+                list_logs.append(os.path.join(r, file))
+    installed_logs_dir = os.path.join(upload_dir, 'installed_logs')
+    print('INFO: Phoronix installed tests logs uploaded to %s' % installed_logs_dir)
+    for log in list_logs:
+        ptsName = ntpath.split(log)[0]
+        ptsName = ntpath.split(ptsName)[1]
+        logFile = ntpath.split(log)[1]
+        ptsLogs_dir = os.path.join(installed_logs_dir, ptsName)
+        if not os.path.exists(ptsLogs_dir):
+            os.makedirs(ptsLogs_dir)
+        shutil.copy(log, ptsLogs_dir)
+
 def register_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-storage", help="path to store test results")
@@ -368,6 +385,8 @@ if __name__ == "__main__":
             nfs_dest = args.nfs_mount[2]
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
         auto_publish_results(get_resultsdir(), upload_dir, image_id)
+        installed_logs = os.path.join(upload_dir, get_resultsfiles(get_resultsdir()))
+        get_phoronix_logs(installed_logs, get_installed_dir())
     if compare_results:
         results_dir = args.compare_results[0]
         upload_dir = args.compare_results[1]
