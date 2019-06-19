@@ -262,16 +262,21 @@ def auto_publish_results(results, upload_dir, id):
     else:
         print('ERROR: Unable to update %s. File is missing.' % b_info)
 
-def set_identifier(phoronixResult, newid):
+def set_identifier(phoronixResult, newid, merge=False):
     currentResult = get_resultsfiles(phoronixResult)
     phoronixResult = os.path.join(phoronixResult, 'composite.xml')
     tree = ET.parse(phoronixResult)
     root = tree.getroot()
-    for n in root.iter('System'):
-        n.find('Identifier').text = newid
-    for n in root.iter('Entry'):
-        n.find('Identifier').text = newid
-    print("INFO: Set new identifier on Phoronix result as %s" % newid)
+    if merge is False:
+        for n in root.iter('System'):
+            n.find('Identifier').text = newid
+        for n in root.iter('Entry'):
+            n.find('Identifier').text = newid
+        print("INFO: Set new identifier on Phoronix result as %s" % newid)
+    else:
+        for n in root.iter('Generated'):
+            n.find('Title').text = newid
+        print("INFO: Set title for merge result as %s" % newid)
     tree.write(phoronixResult)
     cmd = 'phoronix-test-suite refresh-graphs %s' % currentResult
     subprocess.run(cmd, shell=True)
