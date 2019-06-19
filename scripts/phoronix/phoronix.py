@@ -200,6 +200,7 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
         if re.findall(r'merge-*', m):
             timestamp = datetime.now().strftime('%Y-%m-%d-%H%M')
             mergeFolder = 'merge-' + timestamp
+            set_identifier(os.path.join(tmp_results_dir, m), mergeFolder, True)
             shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder))
             print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder)))
             if os.path.islink(dest_symlink):
