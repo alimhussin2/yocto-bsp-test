@@ -73,6 +73,9 @@ def configure_phoronix(proxy_address, proxy_port, installed_dir, cache_dir, resu
         item.find('ResultsDirectory').text = os.path.join(results_dir, get_boardinfo())
     print("INFO: save phoronix config to %s" % (os.path.join("/etc", phoronix_config)))
     tree.write(os.path.join("/etc", phoronix_config))
+    if os.path.exists(installed_dir):
+        cmd = 'find -name *.log -exec rm -rf {} \;'
+        subprocess.run(cmd, shell=True)
 
 def get_resultsdir():
     tree = ET.parse('/etc/phoronix-test-suite.xml')
