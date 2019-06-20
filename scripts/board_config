@@ -80,10 +80,11 @@ if [[ ! -z $nvme ]]; then
         mkdir /nvme
     fi
     mount $nvme /nvme
-fi
-
-if [[ $? -eq 0 ]]; then
+    if [[ $? -eq 0 ]]; then
     echo "[  OK  ] Successfully mount $nvme to /nvme"
+    fi
+else
+    echo "[ INFO ] NVME partition is not exist"
 fi
 
 #list_media=`ls /run/media`
