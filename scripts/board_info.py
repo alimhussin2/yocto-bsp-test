@@ -13,6 +13,7 @@ import re
 import os
 import sys
 from shutil import copyfile
+from os.path import expanduser
 try:
     utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
     sys.path.append(utilsdir)
@@ -173,12 +174,12 @@ if __name__ == "__main__":
             "user": get_user(), 
             "hostname": get_hostname(), 
             "network": show_netinfo()}
-    path = '/home/root'
+    home = expanduser("~")
     json_file = 'board_info.json'
-    create_info_file(data, path, json_file)
-    info_file = os.path.join(path, json_file)
-    print('Board info was created at %s' % (os.path.join(path, json_file)))
-    #load_board_info(os.path.join(path, json_file))
+    create_info_file(data, home, json_file)
+    info_file = os.path.join(home, json_file)
+    print('Board info was created at %s' % (os.path.join(home, json_file)))
+    #load_board_info(os.path.join(home, json_file))
     dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
     copy_to(info_file, dest_board_info ,'board_info.json')
     copy_to(info_file, create_lava_dir(), 'board_info.json')
