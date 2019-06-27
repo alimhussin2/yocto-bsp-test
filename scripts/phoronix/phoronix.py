@@ -272,6 +272,7 @@ def set_identifier(phoronixResult, newid, merge=False):
     tree = ET.parse(phoronixResult)
     root = tree.getroot()
     if merge is False:
+        newid = newid + '-' + currentResult
         for n in root.iter('System'):
             n.find('Identifier').text = newid
         for n in root.iter('Entry'):
