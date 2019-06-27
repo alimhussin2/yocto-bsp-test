@@ -283,6 +283,8 @@ def set_identifier(phoronixResult, newid, merge=False):
             n.find('Title').text = newid
         print("INFO: Set title for merge result as %s" % newid)
     tree.write(phoronixResult)
+    cmd = "sed -i 's/<Description \/>/<Description>No description<\/Description>/g' %s" % phoronixResult
+    subprocess.run(cmd, shell=True)
     cmd = 'phoronix-test-suite refresh-graphs %s' % currentResult
     subprocess.run(cmd, shell=True)
 
