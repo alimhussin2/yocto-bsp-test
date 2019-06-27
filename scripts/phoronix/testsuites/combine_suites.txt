@@ -17,6 +17,7 @@ encode-mp3
 ffmpeg
 fhourstones
 glibc-bench
+go-benchmark
 pts/gnupg
 system/gnupg
 gpu-residency
