@@ -5,7 +5,6 @@ build-gcc
 build-linux-kernel
 build-php
 c-ray
-cloverleaf
 compress-7zip
 compress-gzip
 compress-xz
@@ -16,7 +15,6 @@ dcraw
 ebizzy
 encode-mp3
 ffmpeg
-ffte
 fhourstones
 glibc-bench
 pts/gnupg
@@ -29,13 +27,10 @@ luajit
 m-queens
 mafft
 namd
-npb
 numpy
 openssl
-parboil
 perl-benchmark
 povray
-rbenchmark
 scimark2
 smallpt
 tscp
@@ -50,7 +45,6 @@ osbench
 php
 phpbench
 redis
-scikit-learn
 sysbench
 systemd-boot-total
 openarena
