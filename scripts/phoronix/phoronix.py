@@ -221,7 +221,7 @@ def query_results(list_results, machine, distro):
         if re.findall(machine, lr):
             if re.findall(distro, lr):
                 qr.append(lr)
-    if len(qr) > 1:
+    if len(qr) > 0:
         for rawResult in qr:
             epocTime = os.path.getmtime(rawResult)
             result_ww = int(time.strftime('%U', time.localtime(epocTime)))+1
