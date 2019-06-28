@@ -55,6 +55,19 @@ mount -o rw,hard,intr nfsserver:/srv/data /srv/data
 echo "[  INFO  ] Set hostname"
 sed -i "s/localhost.localdomain/`hostname`/g" /etc/hosts
 
+nvme=`ls /dev/nvme0n1`
+if [[ ! -z $nvme ]]; then
+    if [[ ! -d "/nvme" ]]; then
+        mkdir /nvme
+    fi
+    mount -o relatime,rw,stripe=256 $nvme /nvme
+    if [[ $? -eq 0 ]]; then
+    echo "[  OK  ] Successfully mount $nvme to /nvme"
+    fi
+else
+    echo "[ INFO ] NVME partition is not exist"
+fi
+
 if [[ $? -eq 0 ]]; then
     echo "[  OK  ] Successfully mount to nfs server"
     #echo "[  INFO  ] Configure vncserver"
