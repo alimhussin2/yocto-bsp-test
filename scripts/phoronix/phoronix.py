@@ -103,7 +103,7 @@ def get_installed_dir():
         installed_dir = n.find('EnvironmentDirectory').text
     return installed_dir
 
-def get_dir(option):
+def get_dir(option, mode):
     """
     File structure is like this
     <base_dir>/<ww_dir>/<lava_dir>/<lava_id_dir>/<phoronix_dir>/<machine_dir>/<os_release_dir>/<pts_results_dir>
@@ -125,16 +125,21 @@ def get_dir(option):
     for d in get_lava_dir():
         lava_idx.append(os.path.join('/', d))
     lava_id = max(lava_idx, key=os.path.getmtime).replace('/', '')
-    base_dir = "/srv/data/archives"
+    if mode:
+        base_dir = "/srv/data/archives"
+    else:
+        base_dir = "/srv/data/nonarchives"
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir, exist_ok=True)
     for r, d, f in os.walk(base_dir):
         for ww in d:
             if re.findall(lava_id, ww):
                 lava_dir = r
-                ww_dir =lava_dir.replace('/lava', '')
+                ww_dir = lava_dir.replace('/lava', '')
             else:
                 count += 1
         if count == len(d):
-            ww_dir = create_archives_by_daily(None, True)
+            ww_dir = create_archives_by_daily(None, mode)
             lava_dir = os.path.join(ww_dir, 'lava')
     lava_id_dir = os.path.join(lava_dir, lava_id)
     phoronix_dir = os.path.join(lava_id_dir, 'phoronix-test-suite')
@@ -249,19 +254,19 @@ def publish_results(results, upload_server, image_id):
     output = subprocess.check_output(cmd, shell=True).decode()
     print("INFO: Successfully upload to %s" % os.path.join(upload_server, get_resultsfiles(results)))
 
-def auto_publish_results(results, upload_dir, id):
+def auto_publish_results(results, upload_dir, image_id, release):
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     dest_dir = os.path.join(upload_dir, get_resultsfiles(results))
-    if id is not None:
-        set_identifier(results, id)
+    if image_id is not None:
+        set_identifier(results, image_id)
     cmd = 'cp -r %s %s' % (results, upload_dir)
     subprocess.check_output(cmd, shell=True).decode()
     print('INFO: Successfully upload to %s' % dest_dir)
     data = {"phoronixResults" : dest_dir}
-    b_info = os.path.join(get_dir("lava_id_dir"), 'board_info.json')
+    b_info = os.path.join(get_dir("lava_id_dir", release), 'board_info.json')
     if os.path.isfile(b_info):
-        update_board_info(get_dir("lava_id_dir"), data)
+        update_board_info(get_dir("lava_id_dir", release), data)
         print('INFO: Successfully updated %s' % b_info)
     else:
         print('ERROR: Unable to update %s. File is missing.' % b_info)
@@ -337,6 +342,8 @@ def register_arguments():
     parser.add_argument("--performance", help="set scaling_governor to performance instead of powersaver.", action="store_true")
     parser.add_argument("--id", help="set phoronix identifier such as OS name on phoronix result")
     parser.add_argument("--prepare-env", help="Copy Phoronix cache files form NFS server to target device.")
+    parser.add_argument("--publish-result", help="The test results will be published to /srv/data/archives if set, \
+                         else to /srv/data/nonarchives", action="store_true")
     args = parser.parse_args()
     return args
 
@@ -356,6 +363,8 @@ if __name__ == "__main__":
     perf = args.performance
     phoronix_cache = args.prepare_env
     image_id = args.id
+    release = args.publish_result
+    mode = False
 
     if check_package('phoronix-test-suite') == 1:
         exit()
@@ -378,6 +387,11 @@ if __name__ == "__main__":
         print("INFO: Set scaling_governor to performance")
         cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         subprocess.run(cmd, shell=True)
+    if release:
+        mode = True
+        print("INFO: This is an official benchmark")
+    else:
+        print("INFO: This is a non-official benchmark")
     if phoronix_cache:
         if nfs_mount:
             nfs_server = args.nfs_mount[0]
@@ -386,9 +400,9 @@ if __name__ == "__main__":
         prepare_environment(installed_tests, phoronix_cache, nfs_server, nfs_src, nfs_dest)
     if start_tests:
         if not image_id:
-            upload_dir = get_dir("os_release_dir")
+            upload_dir = get_dir("os_release_dir", mode)
         else:
-            upload_dir = get_dir("machine_dir")
+            upload_dir = get_dir("machine_dir", mode)
             upload_dir = os.path.join(upload_dir, image_id)
         run_tests(start_tests)
         if nfs_mount:
@@ -396,7 +410,7 @@ if __name__ == "__main__":
             nfs_src = args.nfs_mount[1]
             nfs_dest = args.nfs_mount[2]
             do_mountnfs(nfs_server, nfs_src, nfs_dest)
-        auto_publish_results(get_resultsdir(), upload_dir, image_id)
+        auto_publish_results(get_resultsdir(), upload_dir, image_id, mode)
         installed_logs = os.path.join(upload_dir, get_resultsfiles(get_resultsdir()))
         get_phoronix_logs(installed_logs, get_installed_dir())
     if compare_results:
@@ -415,6 +429,6 @@ if __name__ == "__main__":
         print("INFO: Convert phoronix test results to json format")
         raw_result = os.path.join(get_resultsdir(), 'composite.xml')
         if os.path.isfile(raw_result):
-            convert_xmltojson(raw_result, get_dir("lava_id_dir"))
+            convert_xmltojson(raw_result, get_dir("lava_id_dir", mode))
         else:
             print('ERROR: %s is not exist!' % result)
