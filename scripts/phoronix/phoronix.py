@@ -342,8 +342,8 @@ def register_arguments():
     parser.add_argument("--performance", help="set scaling_governor to performance instead of powersaver.", action="store_true")
     parser.add_argument("--id", help="set phoronix identifier such as OS name on phoronix result")
     parser.add_argument("--prepare-env", help="Copy Phoronix cache files form NFS server to target device.")
-    parser.add_argument("--publish-result", help="The test results will be published to /srv/data/archives if set, \
-                         else to /srv/data/nonarchives", action="store_true")
+    parser.add_argument("--publish-result", help="The test results will be published to /srv/data/archives if set to True, \
+                         else to /srv/data/nonarchives if set to False")
     args = parser.parse_args()
     return args
 
@@ -387,10 +387,10 @@ if __name__ == "__main__":
         print("INFO: Set scaling_governor to performance")
         cmd = "echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         subprocess.run(cmd, shell=True)
-    if release:
+    if release == 'True':
         mode = True
         print("INFO: This is an official benchmark")
-    else:
+    elif release == 'False':
         print("INFO: This is a non-official benchmark")
     if phoronix_cache:
         if nfs_mount:
