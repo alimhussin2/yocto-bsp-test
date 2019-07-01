@@ -13,11 +13,15 @@ metadata:
         - functional
     environment:
         - lava-test-shell
+
+params:
+    NFS_SERVER: ""
+
 run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
+        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config ${NFS_SERVER}"
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
         - python3 scripts/sanity_test/sanity_test.py
         
