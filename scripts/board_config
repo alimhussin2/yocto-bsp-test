@@ -52,14 +52,18 @@ if [[ ! -d "/srv/data" ]]; then
 else
     echo "[  INFO  ] Directory /srv/data exists"
 fi
-echo "[  INFO  ] Mount to nfs server"
-mount -o rw,hard,intr $NFSSERVER:/srv/data /srv/data
 
-if [[ $? -eq 0 ]]; then
-    echo "[  OK  ] Successfully mount to nfs server"
-    mount -l | grep -i nfs
+if [[ ! -z $NFSSERVER ]]; then
+    echo "[  INFO  ] Mount to NFS server: $NFSSERVER"
+    mount -o rw,hard,intr $NFSSERVER:/srv/data /srv/data
+    if [[ $? -eq 0 ]]; then
+        echo "[  OK  ] Successfully mount to nfs server"
+        mount -l | grep -i nfs
+    else
+        echo "[  ERROR  ] Unable to mount to nfs server"
+    fi
 else
-    echo "[  ERROR  ] Unable to mount to nfs server"
+    echo "[  INFO  ] NFS server is not specify"
 fi
 
 echo "[  INFO  ] Set hostname"
