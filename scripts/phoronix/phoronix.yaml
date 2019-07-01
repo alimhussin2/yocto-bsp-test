@@ -31,6 +31,7 @@ params:
         PHORONIX_MERGE_RESULTS_DIR : ""
         DEVICE : ""
         DISTROS_LIST : ""
+        PUBLISH_RESULT: ""
 run:
     steps:
         - ls -l
@@ -39,16 +40,7 @@ run:
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
         - cd scripts/phoronix
         - lava-test-case "Change_IO_scheduler" --shell "bash image_config.sh"
-        - python3 phoronix.py \
-          --proxy-port ${PROXY_PORT} \
-          --proxy-address ${PROXY_SERVER} \
-          --results-storage ${RESULTS_DIR} \
-          --installed-tests ${INSTALLED_TESTS_DIR} \
-          --cache-directory ${DL_CACHE_DIR} \
-          --publish-result
-          --run-tests ${TESTSUITES} \
-          --id ${ID} \
-          --nfs-mount ${NFS_SERVER} ${NFS_SRC} ${NFS_DEST}
+        - python3 phoronix.py --proxy-port ${PROXY_PORT} --proxy-address ${PROXY_SERVER} --results-storage ${RESULTS_DIR} --installed-tests ${INSTALLED_TESTS_DIR} --cache-directory ${DL_CACHE_DIR} --publish-result ${PUBLISH_RESULT} --run-tests ${TESTSUITES} --id ${ID} --nfs-mount ${NFS_SERVER} ${NFS_SRC} ${NFS_DEST}
         - python3 phoronix.py --id ${ID} --upload-results ${UPLOAD_DIR}
         - python3 phoronix.py --convert-json
         - python3 phoronix.py --compare-results ${PHORONIX_ARCHIVE_RESULTS_DIR} ${PHORONIX_MERGE_RESULTS_DIR} ${DEVICE} ${DISTROS_LIST}
