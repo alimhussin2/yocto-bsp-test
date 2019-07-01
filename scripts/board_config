@@ -55,6 +55,7 @@ mount -o rw,hard,intr $NFSSERVER:/srv/data /srv/data
 
 if [[ $? -eq 0 ]]; then
     echo "[  OK  ] Successfully mount to nfs server"
+    mount -l | grep -i nfs
 else
     echo "[  ERROR  ] Unable to mount to nfs server"
 fi
