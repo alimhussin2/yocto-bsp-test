@@ -16,13 +16,14 @@ metadata:
 
 params:
     NFS_SERVER: ""
+    ARCHIVES : ""
 
 run:
     steps:
         - ls -l
         - chmod 755 -R scripts
         - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config ${NFS_SERVER}"
-        - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
+        - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py --archives ${ARCHIVES}"
         - python3 scripts/sanity_test/sanity_test.py
         
 parse:
