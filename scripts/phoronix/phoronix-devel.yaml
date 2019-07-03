@@ -36,7 +36,7 @@ run:
     steps:
         - ls -l
         - chmod 755 -R scripts
-        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config"
+        - lava-test-case "do_basic_configuration" --shell "bash scripts/board_config ${NFS_SERVER}"
         - lava-test-case "extract_board_info" --shell "python3 scripts/board_info.py"
         - cd scripts/phoronix
         - lava-test-case "Change_IO_scheduler" --shell "bash image_config.sh"
