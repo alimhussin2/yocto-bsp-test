@@ -12,6 +12,7 @@ import json
 import re
 import os
 import sys
+import argparse
 from shutil import copyfile
 from os.path import expanduser
 try:
@@ -152,14 +153,20 @@ def update_board_info(path_board_info, data):
     with open(b_info, 'w') as f:
         json.dump(feed, f, sort_keys=False, indent=4, separators=(',',': '))
 
-def create_lava_dir():
-    ww_dir = create_archives_by_daily(None, True)
+def create_lava_dir(mode):
+    ww_dir = create_archives_by_daily(None, mode)
     lava_dir = os.path.join(ww_dir, 'lava')
     lava_id = get_lava_job_id()
     lava_path = os.path.join(lava_dir, 'lava-' + lava_id)
     if not os.path.exists(lava_path):
         os.makedirs(lava_path)
     return lava_path
+
+def register_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--archives", help="Set True to strore board_info.json to /srv/data/archives directory. \
+                         Set False to store in /srv/data/nonarchives directory.")
+    return parser.parse_args()
 
 if __name__ == "__main__":
     #nfsserver = sys.argv[1]
@@ -169,6 +176,9 @@ if __name__ == "__main__":
     #    do_mountnfs(nfsserver, nfssrc, dest)
     #except subprocess.TimeoutExpired:
     #    print('[  ERROR  ] NFS server not found')
+    args = register_arguments()
+    archives = args.archives
+    mode = False
     data = {"lava_job_id": get_lava_job_id(), 
             "kernel": get_kernel_version(), 
             "user": get_user(), 
@@ -182,5 +192,7 @@ if __name__ == "__main__":
     #load_board_info(os.path.join(home, json_file))
     dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
     copy_to(info_file, dest_board_info ,'board_info.json')
-    copy_to(info_file, create_lava_dir(), 'board_info.json')
+    if archives == 'True':
+        mode = True
+    copy_to(info_file, create_lava_dir(mode), 'board_info.json')
 
