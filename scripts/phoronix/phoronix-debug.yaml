@@ -20,7 +20,6 @@ params:
         INSTALLED_TESTS_DIR : ""
         DL_CACHE_DIR : ""
         RESULTS_DIR : ""
-        UPLOAD_DIR : ""
         NFS_SERVER : ""
         PUBLISH_RESULT: ""
 run:
