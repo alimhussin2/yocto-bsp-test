@@ -1,6 +1,7 @@
 #!/bin/bash
 
-timeout=43200  # seconds
+hours=72
+timeout=$((3600 * $hours))  # seconds
 DELAY=10
 run_timer() {
 local timer=0
