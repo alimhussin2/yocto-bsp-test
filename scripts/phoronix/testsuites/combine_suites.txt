@@ -4,6 +4,7 @@ botan
 build-gcc
 build-linux-kernel
 build-php
+byte
 c-ray
 compress-7zip
 compress-gzip
@@ -48,6 +49,7 @@ phpbench
 redis
 sysbench
 systemd-boot-total
+stream
 openarena
 ramspeed
 blogbench
