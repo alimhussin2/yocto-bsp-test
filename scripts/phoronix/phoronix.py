@@ -120,29 +120,34 @@ def get_dir(option, mode):
     """
     lava_dir = ""
     lava_id = ""
+    lava_id_dir = ""
     lava_idx = []
     count = 0
-    for d in get_lava_dir():
-        lava_idx.append(os.path.join('/', d))
-    lava_id = max(lava_idx, key=os.path.getmtime).replace('/', '')
     if mode:
         base_dir = "/srv/data/archives"
     else:
         base_dir = "/srv/data/nonarchives"
     if not os.path.exists(base_dir):
         os.makedirs(base_dir, exist_ok=True)
-    for r, d, f in os.walk(base_dir):
-        for ww in d:
-            if re.findall(lava_id, ww):
-                lava_dir = r
-                ww_dir = lava_dir.replace('/lava', '')
-            else:
-                count += 1
-        if count == len(d):
-            ww_dir = create_archives_by_daily(None, mode)
-            lava_dir = os.path.join(ww_dir, 'lava')
-    lava_id_dir = os.path.join(lava_dir, lava_id)
-    phoronix_dir = os.path.join(lava_id_dir, 'phoronix-test-suite')
+    ww_dir = create_archives_by_daily(None, mode)
+    for d in get_lava_dir():
+        lava_idx.append(os.path.join('/', d))
+    if len(lava_idx) >= 1:
+        lava_id = max(lava_idx, key=os.path.getmtime).lstrip('/')
+        for r, d, f in os.walk(base_dir):
+            for ww in d:
+                if re.findall(lava_id, ww):
+                    lava_dir = r
+                    ww_dir =lava_dir.replace('/lava', '')
+                else:
+                    count += 1
+            if count == len(d):
+                lava_dir = os.path.join(ww_dir, 'lava')
+        lava_id_dir = os.path.join(lava_dir, lava_id)
+    if not lava_id == "":
+        phoronix_dir = os.path.join(lava_id_dir, 'phoronix-test-suite')
+    else:
+        phoronix_dir = os.path.join(ww_dir, 'phoronix-test-suite')
     machine_dir = os.path.join(phoronix_dir, get_boardinfo())
     os_release_dir = os.path.join(machine_dir, get_os())
     if option == "ww_dir":
