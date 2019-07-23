@@ -158,6 +158,10 @@ def get_image_info():
     dict_distro_info = {}
     dict_data = {}
 
+    if not os.path.isfile('/etc/build'):
+        print('WARNING: File /etc/build is not exists')
+        return dict_image_info
+
     with open('/etc/build') as f:
         for line in f:
             if re.findall("=", line):
