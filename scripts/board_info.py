@@ -152,6 +152,31 @@ def update_board_info(path_board_info, data):
     with open(b_info, 'w') as f:
         json.dump(feed, f, sort_keys=False, indent=4, separators=(',',': '))
 
+def get_image_info():
+    items = []
+    dict_meta_layers = {}
+    dict_distro_info = {}
+    dict_data = {}
+
+    with open('/etc/build') as f:
+        for line in f:
+            if re.findall("=", line):
+                items.append(line.replace(' ', '').split('='))
+        f.close()
+
+    for item in items[:2]:
+        dict_distro = {item[0].rstrip('\n'): item[1].rstrip('\n')}
+        dict_distro_info.update(dict_distro)
+
+    for item in items[2:]:
+        dict_layer = {item[0]: item[1].replace('--modified', '').rstrip('\n')}
+        dict_meta_layers.update(dict_layer)
+
+    dict_data.update(dict_distro_info)
+    dict_data.update(dict_meta_layers)
+    dict_image_info = {"image_info": dict_data}
+    return dict_image_info
+
 def create_lava_dir():
     ww_dir = create_archives_by_daily(None, True)
     lava_dir = os.path.join(ww_dir, 'lava')
@@ -177,6 +202,7 @@ if __name__ == "__main__":
     home = expanduser("~")
     json_file = 'board_info.json'
     create_info_file(data, home, json_file)
+    update_board_info(home, get_image_info())
     info_file = os.path.join(home, json_file)
     print('Board info was created at %s' % (os.path.join(home, json_file)))
     #load_board_info(os.path.join(home, json_file))
