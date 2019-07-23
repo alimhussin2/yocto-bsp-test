@@ -84,6 +84,9 @@ def get_resultsdir():
     lresultsdir = []
     for n in root.iter('Testing'):
         resultsdir = n.find('ResultsDirectory').text
+    if not os.path.exists(resultsdir):
+        print('ERROR: Phoronix results are not exists at %s' % resultsdir)
+        exit()
     for rd in os.listdir(resultsdir):
         b = os.path.join(resultsdir, rd)
         if os.path.isdir(b):
