@@ -157,6 +157,7 @@ def get_image_info():
     dict_meta_layers = {}
     dict_distro_info = {}
     dict_data = {}
+    dict_image_info = {}
 
     if not os.path.isfile('/etc/build'):
         print('WARNING: File /etc/build is not exists')
