@@ -133,6 +133,36 @@ def copy_to(src, dest, filename):
 def get_user():
     return subprocess.check_output(['whoami']).decode().strip('\n')
 
+def get_image_info():
+    items = []
+    dict_meta_layers = {}
+    dict_distro_info = {}
+    dict_data = {}
+    dict_image_info = {}
+
+    if not os.path.isfile('/etc/build'):
+        print('WARNING: File /etc/build is not exists')
+        return dict_image_info
+
+    with open('/etc/build') as f:
+        for line in f:
+            if re.findall("=", line):
+                items.append(line.replace(' ', '').split('='))
+        f.close()
+
+    for item in items[:2]:
+        dict_distro = {item[0].rstrip('\n'): item[1].rstrip('\n')}
+        dict_distro_info.update(dict_distro)
+
+    for item in items[2:]:
+        dict_layer = {item[0]: item[1].replace('--modified', '').rstrip('\n')}
+        dict_meta_layers.update(dict_layer)
+
+    dict_data.update(dict_distro_info)
+    dict_data.update(dict_meta_layers)
+    dict_image_info = {"image_info": dict_data}
+    return dict_image_info
+
 def do_mountnfs(nfsserver, src, dest):
     cmd = 'mkdir -p %s; mount %s:%s %s' % (dest, nfsserver, src, dest)
     p = subprocess.run(cmd, shell=True, timeout=10)
@@ -187,6 +217,7 @@ if __name__ == "__main__":
     home = expanduser("~")
     json_file = 'board_info.json'
     create_info_file(data, home, json_file)
+    update_board_info(home, get_image_info())
     info_file = os.path.join(home, json_file)
     print('Board info was created at %s' % (os.path.join(home, json_file)))
     #load_board_info(os.path.join(home, json_file))
