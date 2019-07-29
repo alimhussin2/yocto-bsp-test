@@ -191,13 +191,11 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
     current_results = []
     tmp_results_dir = "/tmp/merge-results"
     dest_symlink = os.path.join(upload_dir, "LATEST")
+    current_ww = int(datetime.today().strftime("%U"))+1
     modify_config(tmp_results_dir)
-    for r, d, f in os.walk(results_dir):
-        for file in f:
-            if '.xml' in file:
-                list_results.append(os.path.join(r, file))
+    list_results = get_list_results(results_dir)
     for distro in distros:
-        qr = query_results(list_results, machine, distro)
+        qr = query_results(list_results, machine, distro, current_ww)
         if qr is not None:
             qry_results.append(qr)
             current_results.append(get_resultsfiles(qr))
@@ -206,34 +204,22 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
         print('ERROR: Phoronix results not found or not enough to merge for this week. Merge result abort!')
         exit()
     else:
-         for qr in qry_results:
-            shutil.copytree(qr, os.path.join(tmp_results_dir, get_resultsfiles(qr)))
-    cmd = "phoronix-test-suite merge-results %s" % ' '.join(current_results)
-    subprocess.run(cmd, shell=True)
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir)
-    for m in os.listdir(tmp_results_dir):
-        if re.findall(r'merge-*', m):
-            timestamp = datetime.now().strftime('%Y-%m-%d-%H%M')
-            mergeFolder = 'merge-' + timestamp
-            set_identifier(os.path.join(tmp_results_dir, m), mergeFolder, True)
-            shutil.copytree(os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder))
-            print("INFO: Upload %s to %s." % (os.path.join(tmp_results_dir, m), os.path.join(upload_dir, mergeFolder)))
-            if os.path.islink(dest_symlink):
-                os.unlink(dest_symlink)
-            os.symlink(os.path.join(upload_dir, mergeFolder), dest_symlink)
-            print("INFO: Symlink %s" % dest_symlink)
-    shutil.rmtree(tmp_results_dir)
+        merge_results(qry_results, upload_dir, True, False)
 
-def query_results(list_results, machine, distro):
-    current_ww = int(datetime.today().strftime("%U"))+1
+def query_results(list_results, machine, distro, current_ww):
     list_weekly_results = []
     qr = []
     latest_result = None
     for lr in list_results:
         if re.findall(machine, lr):
-            if re.findall(distro, lr):
-                qr.append(lr)
+            lrs = lr.split('/')
+            if distro == "meta-intel":
+                clrs = len(lrs[12].split('-'))
+                if re.findall(distro, lrs[12]) and clrs == 2:
+                    qr.append(lr)
+            else:
+                if re.findall(distro, lrs[12]):
+                    qr.append(lr)
     if len(qr) > 0:
         for rawResult in qr:
             epocTime = os.path.getmtime(rawResult)
@@ -252,6 +238,75 @@ def modify_config(tmp_results_dir):
         item.find('ResultsDirectory').text = tmp_results_dir  
     print("INFO: edited phoronix config to %s" % phoronix_config)
     tree.write(phoronix_config)
+
+def merge_results(list_results, upload_dir, create_symlink=False, trends=False):
+    tmp_dir = '/tmp/merge-results'
+    list_current_results = []
+
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
+
+    os.makedirs(tmp_dir, exist_ok=True)
+    os.makedirs(upload_dir, exist_ok=True)
+
+    for m in list_results:
+        distro = m.split('/')[12]
+        result_name = os.path.basename(m)
+        dest_tmp = os.path.join(tmp_dir, result_name)
+        print('DEBUG: dest-temp: %s' % dest_tmp)
+        shutil.copytree(m, dest_tmp)
+        set_identifier(dest_tmp, distro)
+        list_current_results.append(result_name)
+
+    cmd = "phoronix-test-suite merge-results %s" % ' '.join(list_current_results)
+    print('DEBUG: cmd: %s' % cmd)
+    subprocess.run(cmd, shell=True)
+
+    for m in os.listdir(tmp_dir):
+        if re.findall(r'merge-*', m):
+            if trends:
+                ww_prev = list_results[0].split('/')[6]
+                ww_now = list_results[len(list_results) -1].split('/')[6]
+                newid = distro + '-trends-' + 'WW' + ww_prev + '-WW' + ww_now
+                print('DEBUG: newid %s' % newid)
+            else:
+                newid = 'merge-' + datetime.now().strftime('%Y-%m-%d-%H%M')
+
+            set_identifier(os.path.join(tmp_dir, m), newid, True)
+            print('INFO: Upload %s to %s' % (os.path.join(tmp_dir, m), os.path.join(upload_dir, newid)))
+            shutil.copytree(os.path.join(tmp_dir, m), os.path.join(upload_dir, newid))
+
+            if create_symlink:
+                dest_symlink = os.path.join(upload_dir, "LATEST")
+                if os.path.islink(dest_symlink):
+                    os.unlink(dest_symlink)
+                os.symlink(os.path.join(upload_dir, newid), dest_symlink)
+                print("INFO: Symlink %s" % dest_symlink)
+
+    shutil.rmtree(tmp_dir)
+
+
+def get_list_results(results_dir):
+    list_results = []
+    for r, d, f in os.walk(results_dir):
+        for filename in f:
+            if '.xml' in filename:
+                list_results.append(os.path.join(r, filename))
+    return list_results
+
+def query_by_monthly(list_results, machine, distro):
+    output_results = []
+    iteration = 5
+    current_ww = (int(datetime.today().strftime("%U"))+1) - (iteration - 1)
+    print('DEBUG: query-by-month')
+    for i in range(iteration):
+        print('DEBUG: current WW%s' % current_ww)
+        latest_result = query_results(list_results, machine, distro, current_ww)
+        if latest_result is not None:
+            output_results.append(latest_result)
+            print('DEBUG: %s' % latest_result)
+        current_ww += 1
+    return output_results
 
 def publish_results(results, upload_server, image_id):
     suffix_path = get_boardinfo() + '/' + image_id
@@ -352,6 +407,8 @@ def register_arguments():
     parser.add_argument("--prepare-env", help="Copy Phoronix cache files form NFS server to target device.")
     parser.add_argument("--publish-result", help="The test results will be published to /srv/data/archives if set to True, \
                          else to /srv/data/nonarchives if set to False")
+    parser.add_argument("--trends", help="Merge Phoronix results for specific distro for 5 weeks.\
+                         [results_dir] [upload_dir] [machine] [distro]", nargs='*')
     args = parser.parse_args()
     return args
 
@@ -373,6 +430,7 @@ if __name__ == "__main__":
     image_id = args.id
     release = args.publish_result
     mode = False
+    trends = args.trends
 
     if check_package('phoronix-test-suite') == 1:
         exit()
@@ -440,3 +498,11 @@ if __name__ == "__main__":
             convert_xmltojson(raw_result, get_dir("lava_id_dir", mode))
         else:
             print('ERROR: %s is not exist!' % result)
+    if trends:
+        results_dir = args.trends[0]
+        upload_dir = args.trends[1]
+        machine = args.trends[2]
+        distro = args.trends[3]
+        list_results = get_list_results(results_dir)
+        list_monthly_results = query_by_monthly(list_results, machine, distro)
+        merge_results(list_monthly_results, upload_dir, True, True)
