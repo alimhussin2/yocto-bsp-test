@@ -189,10 +189,7 @@ def auto_compare_results(results_dir, upload_dir, machine, *distros):
     list_results = []
     qry_results = []
     current_results = []
-    tmp_results_dir = "/tmp/merge-results"
-    dest_symlink = os.path.join(upload_dir, "LATEST")
     current_ww = int(datetime.today().strftime("%U"))+1
-    modify_config(tmp_results_dir)
     list_results = get_list_results(results_dir)
     for distro in distros:
         qr = query_results(list_results, machine, distro, current_ww)
@@ -214,12 +211,13 @@ def query_results(list_results, machine, distro, current_ww):
         if re.findall(machine, lr):
             lrs = lr.split('/')
             if distro == "meta-intel":
-                clrs = len(lrs[12].split('-'))
-                if re.findall(distro, lrs[12]) and clrs == 2:
+                clrs = len(lrs[len(lrs) -3].split('-'))
+                if re.findall(distro, lrs[len(lrs) -3]) and clrs == 2:
                     qr.append(lr)
             else:
-                if re.findall(distro, lrs[12]):
+                if re.findall(distro, lrs[len(lrs) -3]):
                     qr.append(lr)
+
     if len(qr) > 0:
         for rawResult in qr:
             epocTime = os.path.getmtime(rawResult)
@@ -248,9 +246,12 @@ def merge_results(list_results, upload_dir, create_symlink=False, trends=False):
 
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(upload_dir, exist_ok=True)
+    modify_config(tmp_dir)
 
     for m in list_results:
-        distro = m.split('/')[12]
+        d = m.split('/')
+        distro = d[len(d) -2 ]
+        print('DEBUG: distro: %s' % distro)
         result_name = os.path.basename(m)
         dest_tmp = os.path.join(tmp_dir, result_name)
         print('DEBUG: dest-temp: %s' % dest_tmp)
@@ -265,9 +266,14 @@ def merge_results(list_results, upload_dir, create_symlink=False, trends=False):
     for m in os.listdir(tmp_dir):
         if re.findall(r'merge-*', m):
             if trends:
-                ww_prev = list_results[0].split('/')[6]
-                ww_now = list_results[len(list_results) -1].split('/')[6]
-                newid = distro + '-trends-' + 'WW' + ww_prev + '-WW' + ww_now
+                r1 = os.path.basename(list_results[0]).split('-')
+                ww_prev = datetime(int(r1[0]), int(r1[1]), int(r1[2])).strftime("%V")
+
+                r2 = os.path.basename(list_results[len(list_results) - 1]).split('-')
+                ww_now = datetime(int(r2[0]), int(r2[1]), int(r2[2])).strftime("%V")
+
+                year = r2[0]
+                newid = distro + '-trends-' + 'WW' + ww_prev + '-WW' + ww_now + '-' + year
                 print('DEBUG: newid %s' % newid)
             else:
                 newid = 'merge-' + datetime.now().strftime('%Y-%m-%d-%H%M')
