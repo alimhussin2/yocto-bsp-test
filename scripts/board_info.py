@@ -113,12 +113,14 @@ def get_lava_job_id():
     job id.
     """
     lava_id = []
+    cur_lava_id = ""
     list_dir = [f for f in os.listdir('/') if re.match(r'lava',f)]
-    for d in list_dir:
-        print('[DEBUG] lava id: %s' % d)
-        lava_id.append(os.path.join('/', d))
-    cur_lava_id = max(lava_id, key=os.path.getmtime).replace('/lava-', '')
-    print('[DEBUG] Current lava id: %s' % cur_lava_id)
+    if len(list_dir) > 0:
+        for d in list_dir:
+            print('[DEBUG] lava id: %s' % d)
+            lava_id.append(os.path.join('/', d))
+        cur_lava_id = max(lava_id, key=os.path.getmtime).lstrip('/lava-')
+        print('[DEBUG] Current lava id: %s' % cur_lava_id)
     return cur_lava_id
 
 def copy_to(src, dest, filename):
@@ -194,9 +196,22 @@ def create_lava_dir(mode):
 
 def register_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--archives", help="Set True to strore board_info.json to /srv/data/archives directory. \
+    parser.add_argument("--archives", help="Set True to store board_info.json to /srv/data/archives directory. \
                          Set False to store in /srv/data/nonarchives directory.")
     return parser.parse_args()
+
+def generate_board_info(json_file="board_info.json"):
+    data = {"lava_job_id": get_lava_job_id(),
+            "kernel": get_kernel_version(),
+            "user": get_user(),
+            "hostname": get_hostname(),
+            "network": show_netinfo()}
+    home = expanduser("~")
+    #json_file = 'board_info.json'
+    create_info_file(data, home, json_file)
+    update_board_info(home, get_image_info())
+    info_file = os.path.join(home, json_file)
+    print('Board info was created at %s' % info_file)
 
 if __name__ == "__main__":
     #nfsserver = sys.argv[1]
@@ -209,21 +224,26 @@ if __name__ == "__main__":
     args = register_arguments()
     archives = args.archives
     mode = False
-    data = {"lava_job_id": get_lava_job_id(), 
-            "kernel": get_kernel_version(), 
-            "user": get_user(), 
-            "hostname": get_hostname(), 
-            "network": show_netinfo()}
-    home = expanduser("~")
+
     json_file = 'board_info.json'
-    create_info_file(data, home, json_file)
-    update_board_info(home, get_image_info())
+    home = expanduser("~")
     info_file = os.path.join(home, json_file)
-    print('Board info was created at %s' % (os.path.join(home, json_file)))
-    #load_board_info(os.path.join(home, json_file))
-    dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
-    copy_to(info_file, dest_board_info ,'board_info.json')
+    generate_board_info(json_file)
+
     if archives == 'True':
         mode = True
-    copy_to(info_file, create_lava_dir(mode), 'board_info.json')
+        os.makedirs("/srv/data/archives", exist_ok=True)
+        copy_to(info_file, "/srv/data/archives", json_file)
+        print('Board info was store in /srv/data/archives/%s' % json_file)
+
+    else:
+        os.makedirs("/srv/data/nonarchives", exist_ok=True)
+        copy_to(info_file, "/srv/data/nonarchives", json_file)
+        print('Board info was store in /srv/data/nonarchives/%s' % json_file)
+
+    #load_board_info(os.path.join(home, json_file))
+    if not get_lava_job_id() == "":
+        dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
+        copy_to(info_file, dest_board_info, json_file)
+        copy_to(info_file, create_lava_dir(mode), json_file)
 

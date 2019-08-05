@@ -22,7 +22,7 @@ try:
     sys.path.append(utilsdir)
     from create_archives import *
     from basic_config import *
-    from board_info import update_board_info
+    from board_info import generate_board_info, update_board_info
 except Exception as e:
     print('ERROR: %s in %s' % (e, utilsdir))
 
@@ -333,12 +333,18 @@ def auto_publish_results(results, upload_dir, image_id, release):
     subprocess.check_output(cmd, shell=True).decode()
     print('INFO: Successfully upload to %s' % dest_dir)
     data = {"phoronixResults" : dest_dir}
-    b_info = os.path.join(get_dir("lava_id_dir", release), 'board_info.json')
+    f_info = "board_info.json"
+    generate_board_info(f_info)
+    b_info = os.path.join(os.path.expanduser("~"), f_info)
     if os.path.isfile(b_info):
-        update_board_info(get_dir("lava_id_dir", release), data)
-        print('INFO: Successfully updated %s' % b_info)
+        info_dir = os.path.join(upload_dir, "info")
+        dest_info = os.path.join(info_dir, f_info)
+        update_board_info(os.path.expanduser("~"), data)
+        os.makedirs(info_dir, exist_ok=True)
+        shutil.copyfile(b_info, dest_info)
+        print('INFO: Successfully updated board_info.json at %s' % dest_info)
     else:
-        print('ERROR: Unable to update %s. File is missing.' % b_info)
+        print('ERROR: Unable to update %s. File is missing.' % dest_info)
 
 def set_identifier(phoronixResult, newid, merge=False):
     currentResult = get_resultsfiles(phoronixResult)
