@@ -191,6 +191,9 @@ def create_lava_dir():
         os.makedirs(lava_path)
     return lava_path
 
+def get_platform_arch():
+    return subprocess.check_output(['uname', '-i']).decode().strip('\n')
+
 if __name__ == "__main__":
     #nfsserver = sys.argv[1]
     #nfssrc = sys.argv[2]
@@ -200,7 +203,8 @@ if __name__ == "__main__":
     #except subprocess.TimeoutExpired:
     #    print('[  ERROR  ] NFS server not found')
     data = {"lava_job_id": get_lava_job_id(), 
-            "kernel": get_kernel_version(), 
+            "kernel": get_kernel_version(),
+            "arch": get_platform_arch(),
             "user": get_user(), 
             "hostname": get_hostname(), 
             "network": show_netinfo()}
