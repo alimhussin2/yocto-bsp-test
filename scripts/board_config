@@ -96,4 +96,4 @@ fi
 
 echo "Removed older LAVA overlay files"
 find /  -maxdepth 1 -type d -name "lava*" -mtime +2 -exec rm -rf {} \;
-find / -name "*overlay*" -mtime +2 -exec rm -rf {} \;
+find / -maxdepth 1 -type f -name "*overlay*" -mtime +2 -exec rm -rf {} \;
