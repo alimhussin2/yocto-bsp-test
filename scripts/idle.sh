@@ -1,7 +1,7 @@
 #!/bin/bash
 
-timeout=43200  # seconds
-DELAY=10
+timeout=172800  # seconds (48 hours)
+DELAY=60
 run_timer() {
 local timer=0
 file_minnow_done="$HOME/minnow.idle.done"
