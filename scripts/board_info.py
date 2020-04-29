@@ -8,12 +8,16 @@
 # to install use pip. Example, pip3 install paramiko
 
 import subprocess
-import json
 import re
 import os
 import sys
 from shutil import copyfile
 from os.path import expanduser
+try:
+    import json
+except:
+    print("ERROR: json module is missing")
+    sys.exit(0)
 try:
     utilsdir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils")
     sys.path.append(utilsdir)
