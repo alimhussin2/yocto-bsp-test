@@ -20,7 +20,7 @@ def check_kernel():
 
 if __name__ == "__main__":
     try: NFSSERVER = sys.argv[1]
-    except: NFSSERVER = None
+    except: NFSSERVER = ""
 
     os_name = "Poky"
     os_version = check_os_version(os_name)
@@ -30,15 +30,13 @@ if __name__ == "__main__":
         idle_job = os.path.join(script_dir, "lava_wait.py")
         print(os_version)
         print("Kernel: %s" % check_kernel())
+        if not NFSSERVER:
+            print("INFO: nfs server not specify")
+        cmds = ["bash %s %s" % (board_config, NFSSERVER), "python3 %s" % idle_job]
 
-        if NFSSERVER:
-            print("INFO: mount nfsserver at %s" % NFSSERVER)
-            cmd = "bash %s %s" % (board_config, NFSSERVER)
-        else:
-            print("INFO: NFS server not mounted")
-
-        cmd = "python3 %s" % idle_job
-        subprocess.run(cmd, shell=True)
+        for cmd in cmds:
+            print(cmd)
+            subprocess.run(cmd, shell=True)
 
     else:
         print('os version is %s' % os_version)
