@@ -30,6 +30,8 @@ for iface in $interfaces; do
     fi
 done
 
+echo
+sleep 1
 #echo "[  INFO  ] Install netifaces"
 #pip3 install --proxy=$http_proxy netifaces
 
@@ -54,7 +56,7 @@ fi
 
 if [[ ! -z $NFSSERVER ]]; then
     echo "[  INFO  ] Mount to NFS server: $NFSSERVER"
-    mount -o rw,hard,intr $NFSSERVER:/srv/data /srv/data
+    mount -o rw,hard $NFSSERVER:/srv/data /srv/data
     if [[ $? -eq 0 ]]; then
         echo "[  OK  ] Successfully mount to nfs server"
         mount -l | grep -i nfs
