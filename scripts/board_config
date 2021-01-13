@@ -95,6 +95,15 @@ fi
 #    echo "[  INFO  ] No media attach to device"
 #fi
 
+lava_overlay_dir="/lava*"
+echo "List existing LAVA overlay files"
+if [[ -d ${lava_overlay_dir} ]];then
+    ls $lava_overlay_dir
+else
+    echo "[  INFO ] LAVA overlay not found in $lava_overlay_dir"
+fi
+
 echo "Removed older LAVA overlay files"
+find / -maxdepth 1 -type d -name "lava*" -mtime +2
 find /  -maxdepth 1 -type d -name "lava*" -mtime +2 -exec rm -rf {} \;
 find / -maxdepth 1 -type f -name "*overlay*" -mtime +2 -exec rm -rf {} \;
