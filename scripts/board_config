@@ -104,6 +104,18 @@ else
 fi
 
 echo "Removed older LAVA overlay files"
-find / -maxdepth 1 -type d -name "lava*" -mtime +2
-find /  -maxdepth 1 -type d -name "lava*" -mtime +2 -exec rm -rf {} \;
+CURRENT_DIR=$(pwd)
+LIST_LAVA_DIR=$(find / -maxdepth 1 -type d -name "lava* -mtime +2")
+
+echo "[  INFO ] current dir $CURRENT_DIR"
+
+for LD in ${LIST_LAVA_DIR[@]}; do
+    if [[ $CURRENT_DIR != *"$LD"* ]]; then
+        echo removing $LD
+        echo rm -rf $LD
+    else
+        echo This file/directory is reserved $LD
+    fi
+done
+
 find / -maxdepth 1 -type f -name "*overlay*" -mtime +2 -exec rm -rf {} \;
