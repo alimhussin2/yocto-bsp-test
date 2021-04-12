@@ -58,25 +58,25 @@ def get_network_info():
     return nets
 
 def get_ipaddr(iface):
-    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
+    cmd = "_RAW_STREAM_V4=`ifconfig %s | \
            grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; \
            echo $_RAW_STREAM_V4 | awk '{print$1}'" % iface
     return subprocess.check_output(cmd, shell=True).decode().strip('\n')
 
 def get_broadcast(iface):
-    cmd = "_RAW_STREAM_V4=`/sbin/ifconfig %s | \
+    cmd = "_RAW_STREAM_V4=`ifconfig %s | \
            grep -o -E '([[:xdigit:]]{1,3}\.){3}[[:xdigit:]]{1,3}'`; \
            echo $_RAW_STREAM_V4 | awk '{print$3}'" % iface
     return subprocess.check_output(cmd, shell=True).decode().strip('\n')
 
 def get_macaddr(iface):
-    cmd = "/sbin/ifconfig %s |grep HWaddr" % iface
+    cmd = "ifconfig %s |grep HWaddr" % iface
     output = subprocess.check_output(cmd, shell=True).decode().strip('\n').split()
     macaddr = output[len(output)-1]
     return macaddr
 
 def show_netinfo():
-    cmd = "IFACES=`/sbin/ifconfig | \
+    cmd = "IFACES=`ifconfig | \
            grep -E 'eno[0-9]|ens[0-9]|eth[0-9]|enp[0-9]'`; \
            echo $IFACES | awk  '{ print $1 }'"
     iface = subprocess.check_output(cmd, shell=True).decode().strip('\n')
