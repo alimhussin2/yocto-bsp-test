@@ -51,7 +51,7 @@ if __name__ == '__main__':
     lava_id = get_lava_job_id()
     dest = os.path.join(path, lava_id)
     dest = os.path.join(dest, resultFile)
-    shutil.copyfile(resultFile, dest)
+    #shutil.copyfile(resultFile, dest)
     print(data)
-    print('INFO: Upload %s to %s' % (resultFile, dest))
+    #print('INFO: Upload %s to %s' % (resultFile, dest))
 
