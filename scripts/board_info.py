@@ -11,7 +11,7 @@ import subprocess
 import re
 import os
 import sys
-from shutil import copyfile
+from shutil import copyfile, rmtree
 from os.path import expanduser
 try:
     import json
@@ -133,7 +133,7 @@ def remove_lava_overlay(current_lava_id):
 
     for lid in lava_id:
         print("Removing %s" % lid)
-        shutil.rmtree(lid)
+        rmtree(lid)
 
 def copy_to(src, dest, filename):
     if not os.path.exists(dest):
