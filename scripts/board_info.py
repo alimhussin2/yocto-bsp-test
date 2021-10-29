@@ -124,6 +124,17 @@ def get_lava_job_id():
     print('[DEBUG] Current lava id: %s' % cur_lava_id)
     return cur_lava_id
 
+def remove_lava_overlay(current_lava_id):
+    lava_id = []
+    list_dir = [f for f in os.listdir('/') if re.match(r'lava',f)]
+    for d in list_dir:
+        if not current_lava_id in d:
+            lava_id.append(os.path.join('/', d))
+
+    for lid in lava_id:
+        print("Removing %s" % lid)
+        shutil.rmtree(lid)
+
 def copy_to(src, dest, filename):
     if not os.path.exists(dest):
         print('Directory in %s is not exist. Creating it...' % dest)
@@ -212,6 +223,8 @@ if __name__ == "__main__":
             "user": get_user(), 
             "hostname": get_hostname(), 
             "network": show_netinfo()}
+    current_lava_id = data['lava_job_id']
+    remove_lava_overlay('lava-' + current_lava_id)
     home = expanduser("~")
     json_file = 'board_info.json'
     create_info_file(data, home, json_file)
@@ -219,7 +232,7 @@ if __name__ == "__main__":
     info_file = os.path.join(home, json_file)
     print('Board info was created at %s' % (os.path.join(home, json_file)))
     #load_board_info(os.path.join(home, json_file))
-    dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
-    copy_to(info_file, dest_board_info ,'board_info.json')
-    copy_to(info_file, create_lava_dir(), 'board_info.json')
+    #dest_board_info = get_board_info('/srv/data/LAVA/lava-job')
+    #copy_to(info_file, dest_board_info ,'board_info.json')
+    #copy_to(info_file, create_lava_dir(), 'board_info.json')
 
